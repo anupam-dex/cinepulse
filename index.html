@@ -187,9 +187,15 @@
           <img id="feat-backdrop" src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1400&auto=format&fit=crop&q=85" 
                alt="Hero Backdrop" class="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.7] scale-105 transition-all duration-700 pointer-events-none">
 
-          <!-- Autoplay Video Player Wrapper (Placed above poster, seamlessly fades in when playing) -->
-          <div id="hero-player-wrap" class="absolute inset-0 overflow-hidden flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-700">
-            <div id="feat-trailer-player" class="w-[115%] h-[115%] min-w-[100vw] min-h-[56.25vw] pointer-events-none"></div>
+          <!-- Autoplay Video Player Wrapper (Placed above poster, seamlessly streams in background) -->
+          <div id="hero-player-wrap" class="absolute inset-0 overflow-hidden flex items-center justify-center pointer-events-none transition-opacity duration-700 opacity-90">
+            <iframe id="feat-trailer-player" 
+                    src="https://www.youtube-nocookie.com/embed/gzea5Na24B8?autoplay=1&mute=1&controls=0&loop=1&playlist=gzea5Na24B8&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0" 
+                    title="Featured Movie Trailer"
+                    class="w-[135%] h-[135%] min-w-[100vw] min-h-[56.25vw] object-cover pointer-events-none border-0" 
+                    allow="autoplay; encrypted-media; picture-in-picture" 
+                    tabindex="-1">
+            </iframe>
           </div>
 
           <!-- Cinematic Vignettes & Gradients -->
@@ -272,9 +278,13 @@
 
           <!-- Action Buttons -->
           <div class="pt-3 flex flex-wrap items-center gap-3">
-            <button onclick="playTrailerInModal(currentFeaturedId)" class="px-6 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black font-black text-xs sm:text-sm flex items-center gap-2.5 shadow-xl shadow-white/10 transition-transform hover:scale-105 active:scale-95">
+            <button onclick="playHeroTrailerDirectly()" class="px-6 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black font-black text-xs sm:text-sm flex items-center gap-2.5 shadow-xl shadow-white/10 transition-transform hover:scale-105 active:scale-95" title="Play trailer directly in featuring background">
               <span class="text-red-600 text-base">▶</span>
-              <span>Fullscreen Trailer</span>
+              <span>Play in Background</span>
+            </button>
+            <button onclick="playTrailerInModal(currentFeaturedId)" class="px-4 py-3 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 text-zinc-200 font-bold text-xs sm:text-sm border border-zinc-700 flex items-center gap-2 transition-colors active:scale-95" title="Open full popout trailer modal">
+              <span>⛶</span>
+              <span>Popout Modal</span>
             </button>
             <button onclick="markFeaturedWatched()" class="px-4 py-3 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 text-white font-bold text-xs sm:text-sm border border-zinc-700 flex items-center gap-2 transition-colors active:scale-95">
               <span class="text-emerald-400 font-bold">✓</span>
@@ -1727,9 +1737,8 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
     }
 
     // ==========================================
-    // 4. AUTOPLAYING YOUTUBE TRAILER ON HERO
     // ==========================================
-    // 4. AUTOPLAYING YOUTUBE TRAILER ON HERO (Official YouTube Iframe API)
+    // 4. AUTOPLAYING YOUTUBE TRAILER ON HERO (Direct Background IFrame + API)
     // ==========================================
     let heroPlayer = null;
     let isHeroPlayerReady = false;
@@ -1746,15 +1755,95 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       if (!cleanId) return;
       currentHeroYoutubeId = cleanId;
 
-      if (!window.YT || !window.YT.Player) {
-        setTimeout(() => initHeroPlayer(cleanId), 200);
-        return;
+      const iframe = document.getElementById('feat-trailer-player');
+      if (!iframe) return;
+
+      const expectedSrc = `https://www.youtube-nocookie.com/embed/${cleanId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${cleanId}&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0`;
+
+      if (!iframe.src || !iframe.src.includes(cleanId)) {
+        iframe.src = expectedSrc;
       }
 
-      const playerTarget = document.getElementById('feat-trailer-player');
-      if (!playerTarget) return;
+      const wrap = document.getElementById('hero-player-wrap');
+      if (wrap) {
+        wrap.classList.remove('opacity-0');
+        wrap.classList.add('opacity-90');
+      }
 
-      if (heroPlayer && typeof heroPlayer.loadVideoById === 'function') {
+      if (window.YT && window.YT.Player) {
+        try {
+          if (!heroPlayer) {
+            heroPlayer = new YT.Player('feat-trailer-player', {
+              events: {
+                onReady: (e) => {
+                  isHeroPlayerReady = true;
+                  e.target.mute();
+                  e.target.playVideo();
+                  updateHeroAudioButtonUI();
+                },
+                onStateChange: (e) => {
+                  if (e.data === YT.PlayerState.PLAYING) {
+                    const badge = document.getElementById('trailer-status-badge');
+                    if (badge) {
+                      badge.innerText = "STREAMING TRAILER";
+                      badge.classList.remove('text-amber-400');
+                      badge.classList.add('text-red-400');
+                    }
+                    const triggerBtn = document.getElementById('btn-hero-play-trigger');
+                    if (triggerBtn) triggerBtn.classList.add('hidden');
+                  } else if (e.data === YT.PlayerState.ENDED) {
+                    e.target.playVideo();
+                  }
+                }
+              }
+            });
+          } else if (typeof heroPlayer.loadVideoById === 'function') {
+            heroPlayer.loadVideoById({
+              videoId: cleanId,
+              startSeconds: 0
+            });
+            heroPlayer.mute();
+            heroPlayer.playVideo();
+          }
+        } catch(e) {
+          console.warn("Notice during YT.Player binding:", e);
+        }
+      }
+    }
+
+    function updateHeroTrailer(youtubeId) {
+      if (!youtubeId) return;
+      const cleanId = extractYouTubeId(youtubeId);
+      if (!cleanId) return;
+      currentHeroYoutubeId = cleanId;
+
+      const iframe = document.getElementById('feat-trailer-player');
+      const wrap = document.getElementById('hero-player-wrap');
+      const badge = document.getElementById('trailer-status-badge');
+      const triggerBtn = document.getElementById('btn-hero-play-trigger');
+
+      const expectedSrc = `https://www.youtube-nocookie.com/embed/${cleanId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${cleanId}&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0`;
+
+      if (iframe) {
+        if (!iframe.src || !iframe.src.includes(cleanId)) {
+          iframe.src = expectedSrc;
+        }
+      }
+
+      if (wrap) {
+        wrap.classList.remove('opacity-0');
+        wrap.classList.add('opacity-90');
+      }
+      if (badge) {
+        badge.innerText = "STREAMING TRAILER";
+        badge.classList.remove('text-amber-400');
+        badge.classList.add('text-red-400');
+      }
+      if (triggerBtn) {
+        triggerBtn.classList.add('hidden');
+      }
+
+      if (heroPlayer && isHeroPlayerReady && typeof heroPlayer.loadVideoById === 'function') {
         try {
           heroPlayer.loadVideoById({
             videoId: cleanId,
@@ -1762,104 +1851,73 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
           });
           heroPlayer.mute();
           heroPlayer.playVideo();
-          return;
-        } catch(e) {
-          console.warn("Could not reload video in existing player", e);
-        }
-      }
-
-      try {
-        heroPlayer = new YT.Player('feat-trailer-player', {
-          host: 'https://www.youtube-nocookie.com',
-          videoId: cleanId,
-          playerVars: {
-            autoplay: 1,
-            mute: 1,
-            controls: 0,
-            loop: 1,
-            playsinline: 1,
-            rel: 0,
-            modestbranding: 1,
-            showinfo: 0,
-            iv_load_policy: 3,
-            disablekb: 1,
-            fs: 0,
-            origin: window.location.origin
-          },
-          events: {
-            onReady: (event) => {
-              isHeroPlayerReady = true;
-              event.target.mute();
-              event.target.playVideo();
-              updateHeroAudioButtonUI();
-            },
-            onStateChange: (event) => {
-              const wrap = document.getElementById('hero-player-wrap');
-              const triggerBtn = document.getElementById('btn-hero-play-trigger');
-              const badge = document.getElementById('trailer-status-badge');
-
-              if (event.data === YT.PlayerState.PLAYING) {
-                if (wrap) wrap.classList.remove('opacity-0');
-                if (triggerBtn) triggerBtn.classList.add('hidden');
-                if (badge) {
-                  badge.innerText = "STREAMING TRAILER";
-                  badge.classList.remove('text-amber-400');
-                  badge.classList.add('text-red-400');
-                }
-              } else if (event.data === YT.PlayerState.PAUSED || event.data === -1) {
-                if (triggerBtn) triggerBtn.classList.remove('hidden');
-              } else if (event.data === YT.PlayerState.ENDED) {
-                event.target.playVideo();
-              }
-            },
-            onError: (event) => {
-              console.warn("Hero trailer embed restriction code:", event.data);
-              const badge = document.getElementById('trailer-status-badge');
-              if (badge) {
-                badge.innerText = "STUDIO TRAILER PREVIEW";
-                badge.classList.add('text-amber-400');
-              }
-            }
-          }
-        });
-      } catch (err) {
-        console.warn("Error creating YT.Player", err);
+        } catch(e) {}
       }
     }
 
-    function updateHeroTrailer(youtubeId) {
-      currentHeroYoutubeId = youtubeId;
-      initHeroPlayer(youtubeId);
+    function playHeroTrailerDirectly() {
+      const iframe = document.getElementById('feat-trailer-player');
+      isHeroMuted = false;
+
+      if (heroPlayer && isHeroPlayerReady) {
+        try {
+          heroPlayer.unMute();
+          heroPlayer.setVolume(100);
+          heroPlayer.playVideo();
+        } catch(e) {}
+      }
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'unMute', args: [] }), '*');
+        iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [100] }), '*');
+        iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+      }
+      updateHeroAudioButtonUI();
+      showToast("Playing trailer with sound in featuring background! 🎬");
+      playChime(659.25, 0.1);
     }
 
     function forcePlayHeroTrailer() {
+      const iframe = document.getElementById('feat-trailer-player');
       if (heroPlayer && isHeroPlayerReady) {
-        heroPlayer.mute();
-        heroPlayer.playVideo();
+        try {
+          heroPlayer.mute();
+          heroPlayer.playVideo();
+        } catch(e) {}
+      } else if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
       }
       const triggerBtn = document.getElementById('btn-hero-play-trigger');
       if (triggerBtn) triggerBtn.classList.add('hidden');
     }
 
     function toggleHeroAudio() {
-      if (!heroPlayer || !isHeroPlayerReady) {
-        showToast("Trailer player still loading...");
-        return;
-      }
+      const iframe = document.getElementById('feat-trailer-player');
 
-      try {
-        if (heroPlayer.isMuted()) {
-          heroPlayer.unMute();
-          heroPlayer.setVolume(100);
-          isHeroMuted = false;
-          showToast("Sound unmuted");
-        } else {
-          heroPlayer.mute();
-          isHeroMuted = true;
-          showToast("Sound muted");
+      if (isHeroMuted) {
+        if (heroPlayer && isHeroPlayerReady) {
+          try {
+            heroPlayer.unMute();
+            heroPlayer.setVolume(100);
+          } catch(e) {}
         }
-      } catch(e) {
-        console.warn("Audio toggle error", e);
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'unMute', args: [] }), '*');
+          iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [100] }), '*');
+          iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+        }
+        isHeroMuted = false;
+        showToast("Sound unmuted");
+      } else {
+        if (heroPlayer && isHeroPlayerReady) {
+          try {
+            heroPlayer.mute();
+          } catch(e) {}
+        }
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'mute', args: [] }), '*');
+        }
+        isHeroMuted = true;
+        showToast("Sound muted");
       }
       updateHeroAudioButtonUI();
     }
