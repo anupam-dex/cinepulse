@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CinePulse — Today's Cinema & Watch Radar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Bebas Neue"', 'sans-serif'],
+          },
+          colors: {
+            nred: '#E50914',
+            ndark: '#0b0c10',
+            nsurface: '#13151b',
+            ncard: '#1a1d24',
+            nborder: '#262933',
+            rtomato: '#FA320A',
+            imdb: '#F5C518'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0a0b0e;
+      color: #ffffff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .poster-card {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .poster-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 16px 32px -10px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(229, 9, 20, 0.5);
+    }
+    @keyframes spin-roulette {
+      0% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.15) rotate(180deg); }
+      100% { transform: scale(1) rotate(360deg); }
+    }
+    .roulette-active {
+      animation: spin-roulette 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0a0b0e] text-zinc-100 selection:bg-red-600 selection:text-white">
+
+  <!-- Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-[#0a0b0e]/95 backdrop-blur-md border-b border-nborder/80 px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-600 via-red-700 to-amber-600 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-red-950/60 border border-red-500/40">
+        🍿
+      </div>
+      <div>
+        <h1 class="text-base sm:text-lg font-black tracking-wider text-white flex items-center gap-2">
+          CINEPULSE
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-800 text-red-400 border border-zinc-700/60 font-mono">SEPTEMBER 2026</span>
+        </h1>
+        <p class="text-[11px] text-zinc-400 font-medium">Tonight's Cinema & Personal Watch Radar</p>
+      </div>
+    </div>
+
+    <!-- Right Controls: Shuffle & Tab Switcher -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <button onclick="triggerShuffleWithSound()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 to-red-500/20 hover:from-amber-500/30 hover:to-red-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center gap-2 transition-all shadow-md hover:shadow-amber-500/20 active:scale-95">
+        <span id="shuffle-icon" class="text-sm inline-block">🎲</span>
+        <span>Shuffle Pick</span>
+      </button>
+
+      <div class="flex items-center bg-zinc-900/90 p-1 rounded-lg border border-nborder text-xs font-semibold">
+        <button id="tab-spotlight" onclick="switchView('spotlight')" class="px-3.5 py-1.5 rounded-md bg-nred text-white shadow font-bold transition-all">
+          ✨ Tonight
+        </button>
+        <button id="tab-calendar" onclick="switchView('calendar')" class="px-3.5 py-1.5 rounded-md text-zinc-400 hover:text-white transition-all">
+          📅 Visual Calendar
+        </button>
+        <button id="tab-vault" onclick="switchView('vault')" class="px-3.5 py-1.5 rounded-md text-zinc-400 hover:text-white transition-all">
+          🎬 Watched Vault (<span id="nav-watched-count">29</span>)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+
+    <!-- VIEW 1: TONIGHT'S FEATURED MARQUEE -->
+    <section id="view-spotlight" class="space-y-8">
+      
+      <!-- Big Atmospheric Showcase for Today -->
+      <div class="relative rounded-3xl overflow-hidden border border-zinc-800 bg-nsurface shadow-2xl">
+        <!-- Backdrop Banner with Dynamic Gradients -->
+        <div class="relative h-[380px] sm:h-[460px] md:h-[500px] w-full overflow-hidden">
+          <img id="feat-backdrop" src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1400&auto=format&fit=crop&q=85" 
+               alt="Hero Backdrop" class="w-full h-full object-cover object-center filter brightness-[0.85] scale-105 transition-all duration-700">
+          <div class="absolute inset-0 bg-gradient-to-t from-[#13151b] via-[#13151b]/70 to-transparent"></div>
+          <div class="absolute inset-0 bg-gradient-to-r from-[#13151b] via-[#13151b]/80 to-transparent"></div>
+        </div>
+
+        <!-- Featured Floating Content -->
+        <div class="absolute bottom-0 inset-x-0 p-6 sm:p-10 md:p-12 space-y-4 max-w-3xl">
+          <div class="flex flex-wrap items-center gap-2.5">
+            <span class="px-3 py-1 rounded-md bg-nred text-white text-[11px] font-black uppercase tracking-wider shadow-lg shadow-red-950 flex items-center gap-1.5">
+              <span class="animate-pulse">●</span> Tonight's Screening
+            </span>
+            <span id="feat-date-tag" class="px-2.5 py-1 rounded-md bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 text-xs font-semibold">
+              Sep 14, 2026
+            </span>
+            <span id="feat-dialect-tag" class="px-2.5 py-1 rounded-md bg-blue-950/80 border border-blue-800/60 text-blue-300 text-xs font-semibold flex items-center gap-1">
+              🗣️ Conversational Hindi
+            </span>
+          </div>
+
+          <!-- Title & Badges -->
+          <div class="space-y-1.5">
+            <h2 id="feat-title" class="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight drop-shadow-md">
+              Stree (2018)
+            </h2>
+            <p id="feat-tagline" class="text-xs sm:text-sm text-zinc-300 font-medium italic">
+              "O Stree Kal Aana..." — The cult horror-comedy on small-town folklore and paranoia.
+            </p>
+          </div>
+
+          <!-- Ratings Row (IMDb & Rotten Tomatoes) -->
+          <div class="flex flex-wrap items-center gap-3 sm:gap-4 py-1">
+            <!-- IMDb Rating -->
+            <div class="flex items-center gap-1.5 bg-black/70 backdrop-blur px-3 py-1.5 rounded-lg border border-yellow-500/40 text-xs font-bold text-yellow-400">
+              <span class="bg-imdb text-black px-1.5 py-0.5 rounded font-black text-[10px]">IMDb</span>
+              <span id="feat-imdb" class="text-sm font-black">7.6</span>
+              <span class="text-zinc-500 text-[10px]">/10</span>
+            </div>
+
+            <!-- Rotten Tomatoes Rating (Tomatometer + Popcorn) -->
+            <div class="flex items-center gap-2 bg-black/70 backdrop-blur px-3 py-1.5 rounded-lg border border-red-500/40 text-xs font-bold text-red-400">
+              <span class="text-base">🍅</span>
+              <span id="feat-rt" class="text-sm font-black text-red-300">83%</span>
+              <span class="text-zinc-400 text-[11px] flex items-center gap-1">
+                <span>🍿</span> 88%
+              </span>
+            </div>
+
+            <div class="text-xs text-zinc-300 flex items-center gap-2 bg-zinc-900/60 backdrop-blur px-3 py-1.5 rounded-lg border border-zinc-800">
+              <span id="feat-runtime" class="font-mono font-semibold">2h 08m</span>
+              <span>•</span>
+              <span id="feat-platform" class="text-white font-bold">Netflix / JioCinema</span>
+            </div>
+          </div>
+
+          <!-- Synopsis & Dialect Insight -->
+          <p id="feat-synopsis" class="text-xs sm:text-sm text-zinc-300 line-clamp-2 sm:line-clamp-3 leading-relaxed">
+            In Chanderi, an angry spirit kidnaps men at night during an annual four-day festival. A gifted tailor and his eccentric friends plunge into ancient folklore to unravel the mystery.
+          </p>
+
+          <!-- Action Buttons -->
+          <div class="pt-3 flex flex-wrap items-center gap-3">
+            <button onclick="playTrailerById(currentFeaturedId)" class="px-6 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black font-black text-xs sm:text-sm flex items-center gap-2.5 shadow-xl shadow-white/10 transition-transform hover:scale-105 active:scale-95">
+              <span class="text-red-600 text-base">▶</span>
+              <span>Play Official Trailer</span>
+            </button>
+            <button onclick="markFeaturedWatched()" class="px-4 py-3 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 text-white font-bold text-xs sm:text-sm border border-zinc-700 flex items-center gap-2 transition-colors active:scale-95">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span>Mark as Watched</span>
+            </button>
+            <button onclick="triggerShuffleWithSound()" class="px-4 py-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 font-bold text-xs sm:text-sm border border-amber-500/40 flex items-center gap-2 transition-colors active:scale-95">
+              <span>🎲</span>
+              <span>Pick Another</span>
+            </button>
+            <button onclick="openDetailModal(currentFeaturedId)" class="px-3.5 py-3 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 font-semibold text-xs border border-zinc-800 transition-colors">
+              Details & Notes
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Up Next on Radar Strip -->
+      <div class="space-y-3.5">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+              <span>Next Up on Cinema Radar</span>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-mono">Prioritized</span>
+            </h3>
+            <p class="text-xs text-zinc-400">Preview trailers and Rotten Tomatoes / IMDb scores for upcoming scheduled screenings.</p>
+          </div>
+          <button onclick="switchView('calendar')" class="text-xs text-red-400 hover:text-red-300 font-bold flex items-center gap-1.5 transition-colors">
+            <span>Explore Full Month</span> →
+          </button>
+        </div>
+
+        <div id="upcoming-rail" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Dynamically populated cards with ratings & trailer buttons -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- VIEW 2: VISUAL CALENDAR GRID -->
+    <section id="view-calendar" class="hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-nborder pb-4">
+        <div>
+          <h2 class="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+            <span>September 2026 Cinema Schedule</span>
+          </h2>
+          <p class="text-xs text-zinc-400">Interactive visual festival map. Hover over any poster to preview the trailer or inspect scores.</p>
+        </div>
+
+        <!-- Legend Badges -->
+        <div class="flex flex-wrap items-center gap-2 text-[11px]">
+          <span class="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-900 border border-zinc-700/80 text-zinc-300">
+            <span class="w-2 h-2 rounded-full bg-nred"></span> Tonight's Pick
+          </span>
+          <span class="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-900 border border-zinc-700/80 text-zinc-300">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span> Leaves Soon
+          </span>
+          <span class="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-900 border border-zinc-700/80 text-zinc-300">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span> Hindi Study
+          </span>
+          <span class="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-900 border border-zinc-700/80 text-zinc-300">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Watched
+          </span>
+        </div>
+      </div>
+
+      <!-- Days Header -->
+      <div class="grid grid-cols-7 gap-2.5 text-center text-xs font-bold text-zinc-400 py-1 uppercase tracking-wider">
+        <div>Sun</div>
+        <div>Mon</div>
+        <div>Tue</div>
+        <div>Wed</div>
+        <div>Thu</div>
+        <div>Fri</div>
+        <div>Sat</div>
+      </div>
+
+      <!-- Calendar Matrix -->
+      <div id="calendar-grid" class="grid grid-cols-7 gap-2 sm:gap-3">
+        <!-- Rendered Day Tiles -->
+      </div>
+    </section>
+
+    <!-- VIEW 3: WATCHED VAULT & DIARY -->
+    <section id="view-vault" class="hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-nborder pb-4">
+        <div>
+          <h2 class="text-2xl font-black text-white flex items-center gap-2">
+            <span>Watched Movie Vault</span>
+            <span id="vault-count-badge" class="text-xs px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-300 font-mono">29 Titles</span>
+          </h2>
+          <p class="text-xs text-zinc-400">All your completed masterpieces and series with ratings and personal impressions.</p>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="flex flex-wrap items-center gap-1.5 text-xs">
+          <button onclick="filterVault('all')" id="vf-all" class="px-3 py-1 rounded bg-white text-black font-bold">All</button>
+          <button onclick="filterVault('movie')" id="vf-movie" class="px-3 py-1 rounded bg-zinc-800 text-zinc-300 hover:text-white">Movies</button>
+          <button onclick="filterVault('series')" id="vf-series" class="px-3 py-1 rounded bg-zinc-800 text-zinc-300 hover:text-white">Series</button>
+          <button onclick="filterVault('malayalam')" id="vf-malayalam" class="px-3 py-1 rounded bg-zinc-800 text-zinc-300 hover:text-white">Malayalam</button>
+          <button onclick="filterVault('survival')" id="vf-survival" class="px-3 py-1 rounded bg-zinc-800 text-zinc-300 hover:text-white">Survival/War</button>
+          <button onclick="filterVault('horror')" id="vf-horror" class="px-3 py-1 rounded bg-zinc-800 text-zinc-300 hover:text-white">Horror/Lore</button>
+        </div>
+      </div>
+
+      <!-- Vault Grid -->
+      <div id="vault-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+        <!-- Rendered Vault items -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Interactive YouTube Trailer Modal -->
+  <div id="trailer-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="relative w-full max-w-3xl bg-nsurface rounded-2xl overflow-hidden shadow-2xl border border-nborder">
+      <div class="p-3.5 bg-zinc-900 border-b border-nborder flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-red-500 font-bold">▶</span>
+          <h4 id="trailer-title" class="text-sm font-bold text-white truncate">Movie Trailer</h4>
+        </div>
+        <button onclick="closeTrailerModal()" class="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white flex items-center justify-center text-xs font-bold transition-colors">
+          ✕
+        </button>
+      </div>
+
+      <div class="relative aspect-video w-full bg-black">
+        <iframe id="trailer-iframe" src="" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Movie Inspector Modal -->
+  <div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="relative w-full max-w-lg bg-nsurface rounded-2xl overflow-hidden shadow-2xl border border-nborder text-zinc-200">
+      
+      <!-- Close Button -->
+      <button onclick="closeDetailModal()" class="absolute top-3.5 right-3.5 z-20 w-8 h-8 rounded-full bg-black/75 hover:bg-black text-white flex items-center justify-center text-sm font-bold border border-zinc-700 transition-colors">
+        ✕
+      </button>
+
+      <!-- Modal Image Banner -->
+      <div class="relative h-56 w-full overflow-hidden bg-black">
+        <img id="m-poster" src="" alt="Poster" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-nsurface via-nsurface/40 to-transparent"></div>
+        
+        <div class="absolute bottom-3 left-5 right-5 space-y-1">
+          <div class="flex items-center gap-2">
+            <span id="m-tag" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-nred text-white"></span>
+            <span id="m-date-badge" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700"></span>
+          </div>
+          <h3 id="m-title" class="text-2xl font-black text-white leading-tight drop-shadow"></h3>
+          <p id="m-sub" class="text-xs text-zinc-300 font-medium"></p>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 space-y-3.5 text-xs sm:text-sm">
+        <div class="flex flex-wrap items-center gap-3 text-xs">
+          <span class="flex items-center gap-1.5 bg-yellow-500/10 text-yellow-400 px-2.5 py-1 rounded font-bold border border-yellow-500/30">
+            <span class="text-[10px] bg-imdb text-black px-1 rounded font-black">IMDb</span>
+            <span id="m-imdb" class="font-bold">7.5</span>
+          </span>
+          <span class="flex items-center gap-1.5 bg-red-500/10 text-red-400 px-2.5 py-1 rounded font-bold border border-red-500/30">
+            <span>🍅</span>
+            <span id="m-rt" class="font-bold">85%</span>
+          </span>
+          <span id="m-runtime" class="font-mono text-zinc-400"></span>
+          <span id="m-platform" class="px-2 py-0.5 rounded bg-zinc-800 text-white font-medium border border-zinc-700"></span>
+        </div>
+
+        <p id="m-synopsis" class="text-zinc-300 leading-relaxed text-xs sm:text-xs"></p>
+
+        <div id="m-hindi-box" class="hidden p-2.5 rounded-lg bg-blue-950/40 border border-blue-800/40 text-blue-200 text-xs space-y-0.5">
+          <span class="font-bold flex items-center gap-1.5 text-blue-300">🗣️ Conversational Hindi Context</span>
+          <p id="m-hindi-notes" class="text-zinc-300 leading-relaxed"></p>
+        </div>
+
+        <div id="m-expiry-box" class="hidden p-2.5 rounded-lg bg-amber-950/40 border border-amber-800/40 text-amber-200 text-xs flex items-center gap-2">
+          <span>⏳</span>
+          <span id="m-expiry-text"></span>
+        </div>
+
+        <div class="p-2.5 rounded-lg bg-black/40 border border-nborder text-xs text-zinc-400 space-y-0.5">
+          <span class="font-semibold text-zinc-300">Curator's Note:</span>
+          <p id="m-notes" class="italic text-zinc-400"></p>
+        </div>
+
+        <!-- Action Row -->
+        <div class="pt-2 flex items-center justify-between border-t border-nborder">
+          <div class="flex items-center gap-2">
+            <button id="btn-modal-trailer" class="px-3.5 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-bold text-xs flex items-center gap-1.5 transition-all shadow">
+              <span>▶</span> Trailer
+            </button>
+            <button id="btn-modal-watch" class="px-3.5 py-2 rounded-lg bg-nred hover:bg-red-700 text-white font-bold text-xs transition-colors shadow">
+              ✓ Mark Watched
+            </button>
+          </div>
+          <button onclick="closeDetailModal()" class="text-zinc-400 hover:text-white text-xs">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Roulette Shuffle Modal -->
+  <div id="shuffle-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-nsurface p-6 rounded-2xl border border-nborder w-full max-w-sm text-center space-y-4 shadow-2xl">
+      <div id="spin-dice" class="text-4xl inline-block">🎲</div>
+      <div>
+        <h3 class="text-lg font-black text-white">CinePulse Roulette</h3>
+        <p class="text-xs text-zinc-400">Randomly selected gem from your curated radar...</p>
+      </div>
+
+      <div id="shuffle-card" class="p-4 rounded-xl bg-ncard border border-zinc-700 space-y-2 text-left transition-all">
+        <span id="shuf-tag" class="text-[10px] font-bold px-2 py-0.5 rounded bg-nred text-white uppercase">Tonight's Pick</span>
+        <h4 id="shuf-title" class="text-base font-black text-white">Stree (2018)</h4>
+        <div class="flex items-center gap-2 text-xs">
+          <span class="text-yellow-400 font-bold">★ <span id="shuf-imdb">7.6</span></span>
+          <span class="text-red-400 font-bold">🍅 <span id="shuf-rt">83%</span></span>
+          <span class="text-zinc-500">•</span>
+          <span id="shuf-platform" class="text-zinc-300">Netflix</span>
+        </div>
+      </div>
+
+      <div class="flex justify-center gap-2 pt-2">
+        <button onclick="triggerShuffleWithSound()" class="px-3.5 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold border border-zinc-700 transition-colors">
+          🎲 Spin Again
+        </button>
+        <button onclick="lockShufflePick()" class="px-4 py-2 rounded-lg bg-nred hover:bg-red-700 text-white font-bold text-xs shadow-lg transition-colors">
+          Watch Tonight!
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Message -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-nsurface border border-zinc-700 text-white px-4 py-2.5 rounded-lg shadow-2xl text-xs font-semibold translate-y-20 opacity-0 transition-all duration-200 flex items-center gap-2">
+    <span class="text-emerald-400 font-bold">✓</span>
+    <span id="toast-text">Success</span>
+  </div>
+
+  <script>
+    // Master Scheduled Movie Calendar with Real Trailers, IMDb and Rotten Tomatoes Scores
+    let SCHEDULE_ITEMS = [
+      {
+        id: "m-uncharted",
+        day: 11,
+        title: "Uncharted",
+        year: 2022,
+        platform: "Netflix",
+        runtime: "1h 56m",
+        status: "watched",
+        tag: "Watched",
+        tagColor: "bg-emerald-700",
+        imdb: "6.3",
+        rt: "41% / 90%",
+        youtubeId: "eHp3MbsCbMg",
+        poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&auto=format&fit=crop&q=80",
+        synopsis: "Street-smart thief Nathan Drake is recruited by seasoned treasure hunter Sully to recover a fortune lost by Magellan 500 years ago.",
+        notes: "Watched on Sep 11 before removal!"
+      },
+      {
+        id: "m-materialists",
+        day: 12,
+        title: "Materialists",
+        year: 2025,
+        platform: "Netflix",
+        runtime: "1h 57m",
+        status: "dropped",
+        tag: "Dropped (DNF)",
+        tagColor: "bg-zinc-700",
+        imdb: "5.8",
+        rt: "45%",
+        youtubeId: "dQw4w9WgXcQ",
+        poster: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=80",
+        synopsis: "An elite NYC matchmaker gets tangled between a wealthy client and a complicated former lover.",
+        notes: "Watched 30 mins; found it slow and unengaging, dropped."
+      },
+      {
+        id: "m-khosla-orig",
+        day: 13,
+        title: "Khosla Ka Ghosla!",
+        year: 2006,
+        platform: "Netflix",
+        runtime: "2h 15m",
+        status: "skipped",
+        tag: "Rescheduled",
+        tagColor: "bg-zinc-600",
+        imdb: "8.2",
+        rt: "91%",
+        youtubeId: "kC9b3iXm7cE",
+        poster: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=500&auto=format&fit=crop&q=80",
+        synopsis: "A middle-class Delhi family stages an ingenious counter-scam against an arrogant, corrupt land shark.",
+        notes: "Skipped on Sep 13. Rescheduled to Sep 20."
+      },
+      {
+        id: "m-stree",
+        day: 14,
+        title: "Stree",
+        year: 2018,
+        platform: "Netflix / JioCinema",
+        runtime: "2h 08m",
+        status: "today",
+        tag: "Tonight's Feature",
+        tagColor: "bg-nred",
+        imdb: "7.6",
+        rt: "83%",
+        youtubeId: "gzea5Na24B8",
+        poster: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&auto=format&fit=crop&q=80",
+        synopsis: "In Chanderi, an angry spirit abducts men at night during an annual four-day festival. A gifted tailor and his friends solve the haunting.",
+        hindiNotes: "Superb small-town North Indian dialect. Pankaj Tripathi and Rajkummar Rao articulate witty phrasing clearly.",
+        notes: "Tonight's featured watch for conversational Hindi practice."
+      },
+      {
+        id: "m-anora",
+        day: 15,
+        title: "Anora",
+        year: 2024,
+        platform: "Netflix",
+        runtime: "2h 19m",
+        status: "urgent",
+        tag: "Leaves Sep 16",
+        tagColor: "bg-amber-600",
+        imdb: "8.0",
+        rt: "97%",
+        youtubeId: "p4WfQfNqj4w",
+        poster: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=80",
+        synopsis: "A young Brooklyn sex worker impulsively marries an oligarch's son, setting off a chaotic chase across New York City.",
+        notes: "Critical priority: Final hours to stream before removal from Netflix India."
+      },
+      {
+        id: "m-udaan",
+        day: 16,
+        title: "Udaan",
+        year: 2010,
+        platform: "Netflix / JioCinema",
+        runtime: "2h 14m",
+        status: "hindi",
+        tag: "Hindi Drama",
+        tagColor: "bg-blue-600",
+        imdb: "8.1",
+        rt: "89%",
+        youtubeId: "5_13RzF_wD4",
+        poster: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=80",
+        synopsis: "Expelled from boarding school, Rohan returns home to Jamshedpur to work in his strict father's steel factory while dreaming of becoming a writer.",
+        hindiNotes: "Grounded domestic dialogues, formal father-son exchanges, and beautifully enunciated spoken Hindi poetry.",
+        notes: "Vikramaditya Motwane's modern Hindi realism classic."
+      },
+      {
+        id: "m-gow1",
+        day: 17,
+        title: "Gangs of Wasseypur 1",
+        year: 2012,
+        platform: "Netflix",
+        runtime: "2h 40m",
+        status: "hindi",
+        tag: "Crime Epic",
+        tagColor: "bg-blue-600",
+        imdb: "8.2",
+        rt: "96%",
+        youtubeId: "j-OzN_3F_eQ",
+        poster: "https://images.unsplash.com/photo-1533488765986-dfa2a9939acd?w=500&auto=format&fit=crop&q=80",
+        synopsis: "Three-generation blood feud for dominance over Dhanbad's coal syndicate.",
+        hindiNotes: "Authentic eastern colloquialisms, rustic slang, and iconic Bihari dialect cadence.",
+        notes: "Anurag Kashyap's landmark crime epic."
+      },
+      {
+        id: "m-gow2",
+        day: 18,
+        title: "Gangs of Wasseypur 2",
+        year: 2012,
+        platform: "Netflix",
+        runtime: "2h 39m",
+        status: "hindi",
+        tag: "Epic Finale",
+        tagColor: "bg-blue-600",
+        imdb: "8.2",
+        rt: "97%",
+        youtubeId: "f4XnF3_xXzQ",
+        poster: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=500&auto=format&fit=crop&q=80",
+        synopsis: "Faizal Khan rises to avenge his kin as Dhanbad's criminal empire spirals to its violent conclusion.",
+        hindiNotes: "Faizal Khan's iconic lines and dark, rapid-fire street humor.",
+        notes: "Part 2 grand finale."
+      },
+      {
+        id: "m-28years",
+        day: 19,
+        title: "28 Years Later",
+        year: 2025,
+        platform: "Netflix",
+        runtime: "1h 55m",
+        status: "urgent",
+        tag: "Leaves Today",
+        tagColor: "bg-amber-600",
+        imdb: "7.4",
+        rt: "82%",
+        youtubeId: "dQw4w9WgXcQ",
+        poster: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=500&auto=format&fit=crop&q=80",
+        synopsis: "Survivors traverse an altered, quarantined British landscape decades following the rage virus.",
+        notes: "Final day to stream before removal from Netflix India."
+      },
+      {
+        id: "m-khosla-new",
+        day: 20,
+        title: "Khosla Ka Ghosla!",
+        year: 2006,
+        platform: "Netflix",
+        runtime: "2h 15m",
+        status: "rescheduled",
+        tag: "Rescheduled",
+        tagColor: "bg-blue-600",
+        imdb: "8.2",
+        rt: "91%",
+        youtubeId: "kC9b3iXm7cE",
+        poster: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=500&auto=format&fit=crop&q=80",
+        synopsis: "A middle-class family stages a clever scam to reclaim their stolen plot from a corrupt builder.",
+        hindiNotes: "Middle-class Delhi domestic vocabulary and organic conversational address.",
+        notes: "Rescheduled from Sep 13."
+      },
+      {
+        id: "m-goodplace-1",
+        day: 21,
+        title: "The Good Place (1-4)",
+        year: 2016,
+        platform: "Netflix",
+        runtime: "4 Episodes",
+        status: "urgent",
+        tag: "Leaves Sep 25",
+        tagColor: "bg-amber-600",
+        imdb: "8.2",
+        rt: "97%",
+        youtubeId: "RfBgT5djaQw",
+        poster: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=500&auto=format&fit=crop&q=80",
+        synopsis: "Eleanor awakens in the afterlife and tries to secretly become ethical.",
+        notes: "Begin binge before removal."
+      },
+      {
+        id: "m-nohardfeelings",
+        day: 22,
+        title: "No Hard Feelings",
+        year: 2023,
+        platform: "Netflix",
+        runtime: "1h 43m",
+        status: "urgent",
+        tag: "Leaves Today",
+        tagColor: "bg-amber-600",
+        imdb: "6.4",
+        rt: "70%",
+        youtubeId: "bPt0lNWm7Z4",
+        poster: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&auto=format&fit=crop&q=80",
+        synopsis: "Facing bankruptcy, a woman agrees to date an introverted teen before he heads to college.",
+        notes: "Leaves Netflix today."
+      },
+      {
+        id: "m-jp3",
+        day: 29,
+        title: "Jurassic Park III",
+        year: 2001,
+        platform: "Netflix",
+        runtime: "1h 32m",
+        status: "urgent",
+        tag: "Leaves Today",
+        tagColor: "bg-amber-600",
+        imdb: "6.0",
+        rt: "49%",
+        youtubeId: "gjYvVfV9kPQ",
+        poster: "https://images.unsplash.com/photo-1569793666155-27a36c84c173?w=500&auto=format&fit=crop&q=80",
+        synopsis: "Dr. Alan Grant is tricked into returning to Isla Sorna, facing dangerous prehistoric predators.",
+        notes: "Final day to stream before removal."
+      },
+      {
+        id: "m-standbyme",
+        day: 30,
+        title: "Stand by Me",
+        year: 1986,
+        platform: "Netflix",
+        runtime: "1h 29m",
+        status: "urgent",
+        tag: "Leaves Today",
+        tagColor: "bg-amber-600",
+        imdb: "8.1",
+        rt: "92%",
+        youtubeId: "HAIa86Zz5v0",
+        poster: "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=500&auto=format&fit=crop&q=80",
+        synopsis: "Four boys journey down the railway tracks in Oregon in search of a missing boy's body.",
+        notes: "Exits Netflix at midnight."
+      }
+    ];
+
+    // Master Watched Diary (29 Titles Logged with Notes and Ratings)
+    let WATCHED_LIST = [
+      { title: "The Lost Bus", year: 2025, type: "movie", platform: "Apple TV+", rating: 5, imdb: "7.8", rt: "88%", tag: "Survival", poster: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&auto=format&fit=crop&q=80", notes: "Watched recently! Inspiring and tearsworthy Camp Fire survival with Kevin McKay." },
+      { title: "Greyhound", year: 2020, type: "movie", platform: "Apple TV+", rating: 5, imdb: "7.0", rt: "78%", tag: "War", poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&auto=format&fit=crop&q=80", notes: "Awesome movie! Masterclass in stripped-down naval sonar tension." },
+      { title: "1917", year: 2019, type: "movie", platform: "Netflix", rating: 5, imdb: "8.2", rt: "89%", tag: "War", poster: "https://images.unsplash.com/photo-1533488765986-dfa2a9939acd?w=500&auto=format&fit=crop&q=80", notes: "Loved it! Continuous camera work across No Man's Land." },
+      { title: "Titanic", year: 1997, type: "movie", platform: "JioHotstar", rating: 5, imdb: "7.9", rt: "88%", tag: "Classic", poster: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&auto=format&fit=crop&q=80", notes: "Subscribed to JioHotstar just for this! Rewatched multiple times, ultimate favorite masterpiece." },
+      { title: "Tumbbad", year: 2018, type: "movie", platform: "JioHotstar", rating: 5, imdb: "8.2", rt: "87%", tag: "Horror", poster: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=80", notes: "All-time favorite Indian mythological horror. Hastar and the dough well are unforgettable." },
+      { title: "Incantation", year: 2022, type: "movie", platform: "Netflix", rating: 4, imdb: "6.2", rt: "75%", tag: "Horror", poster: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=500&auto=format&fit=crop&q=80", notes: "Creepy Taiwanese curse. Loved how it played psychological mind games with the viewer." },
+      { title: "Veronica", year: 2017, type: "movie", platform: "Netflix", rating: 3, imdb: "6.2", rt: "86%", tag: "Horror", poster: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=80", notes: "Just an ok movie, but the detective's photograph and real police photos gave chills." },
+      { title: "12th Fail", year: 2023, type: "movie", platform: "JioHotstar", rating: 5, imdb: "8.9", rt: "94%", tag: "Hindi", poster: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=80", notes: "A pure beauty! Manoj Sharma's grit and clear, conversational North Indian speech." },
+      { title: "Laapataa Ladies", year: 2024, type: "movie", platform: "Netflix", rating: 5, imdb: "8.4", rt: "98%", tag: "Hindi", poster: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=500&auto=format&fit=crop&q=80", notes: "A pure gem! Warm, charming rural storytelling, hilarious humor, and lovely Hindi." },
+      { title: "Mayaanadhi", year: 2017, type: "movie", platform: "JioCinema", rating: 5, imdb: "7.9", rt: "90%", tag: "Malayalam", poster: "https://images.unsplash.com/photo-1518173946687-a4c8a383392e?w=500&auto=format&fit=crop&q=80", notes: "Malayali cinema gem. Tovino Thomas and Aishwarya Lekshmi's haunting love story." },
+      { title: "Aadujeevitham", year: 2024, type: "movie", platform: "Netflix", rating: 5, imdb: "8.2", rt: "91%", tag: "Malayalam", poster: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&auto=format&fit=crop&q=80", notes: "Prithviraj's unbelievable physical transformation and Najeeb's desert survival." },
+      { title: "Kaalapani", year: 1996, type: "movie", platform: "JioCinema", rating: 5, imdb: "8.4", rt: "93%", tag: "Malayalam", poster: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=500&auto=format&fit=crop&q=80", notes: "Lalettan's supreme performance and Priyadarshan's masterpiece on Cellular Jail." },
+      { title: "The Martian", year: 2015, type: "movie", platform: "JioHotstar", rating: 4, imdb: "8.0", rt: "91%", tag: "Survival", poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&auto=format&fit=crop&q=80", notes: "Mark Watney science-ing his way off Mars." },
+      { title: "Forrest Gump", year: 1994, type: "movie", platform: "JioCinema", rating: 5, imdb: "8.8", rt: "71%", tag: "Classic", poster: "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=500&auto=format&fit=crop&q=80", notes: "Heartwarming, unforgettable journey through life." },
+      { title: "Jurassic Park", year: 1993, type: "movie", platform: "JioCinema", rating: 5, imdb: "8.2", rt: "92%", tag: "Classic", poster: "https://images.unsplash.com/photo-1569793666155-27a36c84c173?w=500&auto=format&fit=crop&q=80", notes: "Timeless masterpiece. T-Rex in the rain is forever peak cinema." },
+      { title: "Uncharted", year: 2022, type: "movie", platform: "Netflix", rating: 4, imdb: "6.3", rt: "41%", tag: "Action", poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&auto=format&fit=crop&q=80", notes: "Watched on Sep 11 before removal from Netflix India." },
+      { title: "Little Things", year: 2016, type: "series", platform: "Netflix", rating: 5, imdb: "8.2", rt: "95%", tag: "Series", poster: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=500&auto=format&fit=crop&q=80", notes: "Ultimate comfort show! Dhruv and Kavya's realistic everyday Mumbai life." },
+      { title: "Dark", year: 2017, type: "series", platform: "Netflix", rating: 5, imdb: "8.7", rt: "95%", tag: "Series", poster: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=500&auto=format&fit=crop&q=80", notes: "German sci-fi mind-bender. Flawless time paradox puzzle." },
+      { title: "Severance", year: 2022, type: "series", platform: "Apple TV+", rating: 5, imdb: "8.7", rt: "97%", tag: "Series", poster: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=80", notes: "Peak modern TV. Chilling work-life memory bifurcation." },
+      { title: "Silo", year: 2023, type: "series", platform: "Apple TV+", rating: 4, imdb: "8.1", rt: "88%", tag: "Series", poster: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=80", notes: "144 levels underground. Gripping post-apocalyptic secrets." },
+      { title: "Lost", year: 2004, type: "series", platform: "JioHotstar", rating: 4, imdb: "8.3", rt: "85%", tag: "Series", poster: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&auto=format&fit=crop&q=80", notes: "The hatch, the numbers, the black smoke monster." },
+      { title: "3 Body Problem", year: 2024, type: "series", platform: "Netflix", rating: 4, imdb: "7.6", rt: "79%", tag: "Series", poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&auto=format&fit=crop&q=80", notes: "Flashing universe and alien VR simulation." },
+      { title: "1899", year: 2022, type: "series", platform: "Netflix", rating: 4, imdb: "7.3", rt: "76%", tag: "Series", poster: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=500&auto=format&fit=crop&q=80", notes: "Kerberos ghost ship enigma from the creators of Dark." },
+      { title: "12 Monkeys", year: 2015, type: "series", platform: "JioCinema", rating: 4, imdb: "7.7", rt: "88%", tag: "Series", poster: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=500&auto=format&fit=crop&q=80", notes: "Splinter time travel and Army of the 12 Monkeys." },
+      { title: "The 100", year: 2014, type: "series", platform: "Netflix", rating: 4, imdb: "7.6", rt: "93%", tag: "Series", poster: "https://images.unsplash.com/photo-1533488765986-dfa2a9939acd?w=500&auto=format&fit=crop&q=80", notes: "Brutal moral survival on repopulated Earth." },
+      { title: "Breaking Bad", year: 2008, type: "series", platform: "Netflix", rating: 5, imdb: "9.5", rt: "96%", tag: "Series", poster: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=80", notes: "Walter White's transformation into Heisenberg." },
+      { title: "Better Call Saul", year: 2015, type: "series", platform: "Netflix", rating: 5, imdb: "9.0", rt: "98%", tag: "Series", poster: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=500&auto=format&fit=crop&q=80", notes: "Jimmy McGill and Kim Wexler's tragic arc." },
+      { title: "Kerala Crime Files", year: 2023, type: "series", platform: "JioHotstar", rating: 4, imdb: "7.2", rt: "85%", tag: "Malayalam", poster: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&auto=format&fit=crop&q=80", notes: "Authentic Kerala lodge murder investigation by CI Kurian." }
+    ];
+
+    let currentFeaturedId = "m-stree";
+    let currentVaultFilter = 'all';
+    let currentShuffledMovie = null;
+
+    // Audio synthesizer for interactive roulette sounds (zero external files required)
+    let audioCtx = null;
+    function playChime(freq = 587.33, duration = 0.08, type = 'sine') {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e) {
+        // Fallback gracefully if audio permissions blocked
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderUpcomingRail();
+      renderCalendarGrid();
+      renderVaultGrid();
+      setFeaturedMovie(currentFeaturedId);
+    });
+
+    function setFeaturedMovie(id) {
+      const movie = SCHEDULE_ITEMS.find(m => m.id === id) || SCHEDULE_ITEMS.find(m => m.id === 'm-stree');
+      if (!movie) return;
+
+      currentFeaturedId = movie.id;
+      document.getElementById('feat-title').innerText = `${movie.title} (${movie.year})`;
+      document.getElementById('feat-synopsis').innerText = movie.synopsis;
+      document.getElementById('feat-imdb').innerText = movie.imdb;
+      document.getElementById('feat-rt').innerText = movie.rt.split('/')[0].trim();
+      document.getElementById('feat-runtime').innerText = movie.runtime;
+      document.getElementById('feat-platform').innerText = movie.platform;
+      document.getElementById('feat-backdrop').src = movie.poster;
+      document.getElementById('feat-date-tag').innerText = `Sep ${movie.day}, 2026`;
+
+      const dialectTag = document.getElementById('feat-dialect-tag');
+      if (movie.hindiNotes) {
+        dialectTag.classList.remove('hidden');
+      } else {
+        dialectTag.classList.add('hidden');
+      }
+    }
+
+    function renderUpcomingRail() {
+      const container = document.getElementById('upcoming-rail');
+      container.innerHTML = '';
+
+      // Upcoming 4 active screenings
+      const upcoming = SCHEDULE_ITEMS.filter(s => s.day >= 15 && s.status !== 'dropped').slice(0, 4);
+
+      upcoming.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "poster-card bg-nsurface border border-nborder rounded-2xl overflow-hidden p-3.5 flex flex-col justify-between group shadow-xl";
+        
+        card.innerHTML = `
+          <div class="space-y-3">
+            <div class="relative aspect-[16/10] rounded-xl overflow-hidden bg-black">
+              <img src="${item.poster}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+              
+              <div class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-black/85 font-mono text-[10px] font-bold text-white backdrop-blur">
+                Sep ${item.day}
+              </div>
+              <div class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded text-[9px] font-bold ${item.tagColor} text-white uppercase shadow">
+                ${item.tag}
+              </div>
+
+              <!-- Interactive Quick Trailer Overlay Button -->
+              <button onclick="playTrailerById('${item.id}'); event.stopPropagation();" 
+                      class="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/60 transition-colors group/btn">
+                <span class="w-10 h-10 rounded-full bg-white/95 text-red-600 flex items-center justify-center font-bold text-sm shadow-xl group-hover/btn:scale-110 transition-transform">
+                  ▶
+                </span>
+              </button>
+            </div>
+
+            <div class="space-y-1">
+              <div class="flex items-center justify-between">
+                <h4 class="font-black text-white truncate text-sm">${item.title}</h4>
+                <span class="font-mono text-zinc-400 text-[11px]">${item.runtime}</span>
+              </div>
+              <p class="text-[11px] text-zinc-400 truncate">${item.platform}</p>
+            </div>
+          </div>
+
+          <!-- Dual Scores & Details Row -->
+          <div class="pt-3 mt-2 border-t border-nborder/60 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2.5">
+              <span class="text-yellow-400 font-bold flex items-center gap-1 text-[11px]">
+                <span class="bg-imdb text-black px-1 rounded font-black text-[9px]">IMDb</span> ${item.imdb}
+              </span>
+              <span class="text-red-400 font-bold text-[11px] flex items-center gap-0.5">
+                <span>🍅</span> ${item.rt.split('/')[0].trim()}
+              </span>
+            </div>
+            <button onclick="openDetailModal('${item.id}')" class="text-zinc-400 hover:text-white text-[11px] font-semibold underline underline-offset-2">
+              Details
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderCalendarGrid() {
+      const container = document.getElementById('calendar-grid');
+      container.innerHTML = '';
+
+      const totalDays = 30;
+      const startDayOffset = 2; // Sept 1, 2026 is Tuesday
+
+      // Leading August days
+      for (let i = 0; i < startDayOffset; i++) {
+        const empty = document.createElement('div');
+        empty.className = "rounded-xl bg-zinc-900/20 border border-zinc-900/40 p-2 text-zinc-700 text-xs font-mono select-none min-h-[160px]";
+        empty.innerHTML = `<span class="opacity-25">${31 - (startDayOffset - 1) + i}</span>`;
+        container.appendChild(empty);
+      }
+
+      for (let dayNum = 1; dayNum <= totalDays; dayNum++) {
+        const cell = document.createElement('div');
+        const match = SCHEDULE_ITEMS.find(s => s.day === dayNum);
+
+        if (match) {
+          const isToday = match.day === 14;
+          cell.className = `poster-card relative rounded-xl overflow-hidden border cursor-pointer group select-none shadow-md min-h-[165px] sm:min-h-[185px] ${
+            isToday ? 'border-nred ring-2 ring-nred/80 shadow-red-950/70' : 'border-zinc-800 hover:border-zinc-500'
+          }`;
+          cell.onclick = () => openDetailModal(match.id);
+
+          cell.innerHTML = `
+            <img src="${match.poster}" alt="${match.title}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/35 group-hover:via-black/45 transition-colors"></div>
+
+            <div class="relative z-10 p-2 sm:p-2.5 flex items-start justify-between">
+              <span class="w-6 h-6 rounded-md flex items-center justify-center font-mono font-black text-xs ${
+                isToday ? 'bg-nred text-white' : 'bg-black/85 text-white backdrop-blur'
+              }">
+                ${dayNum}
+              </span>
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded shadow ${match.tagColor} text-white uppercase">
+                ${match.tag}
+              </span>
+            </div>
+
+            <!-- Badges for Ratings on Tile -->
+            <div class="absolute top-9 left-2 z-10 flex flex-col gap-1">
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-black/80 text-yellow-400 backdrop-blur w-fit flex items-center gap-1">
+                <span class="bg-imdb text-black px-1 rounded font-black text-[8px]">IMDb</span> ${match.imdb}
+              </span>
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-black/80 text-red-400 backdrop-blur w-fit flex items-center gap-1">
+                <span>🍅</span> ${match.rt.split('/')[0].trim()}
+              </span>
+            </div>
+
+            <!-- Bottom Title & Trailer trigger -->
+            <div class="absolute bottom-0 inset-x-0 p-2.5 z-10 space-y-0.5">
+              <h4 class="text-xs sm:text-sm font-black text-white truncate drop-shadow leading-tight">${match.title}</h4>
+              <p class="text-[10px] text-zinc-300 truncate drop-shadow">${match.platform}</p>
+            </div>
+          `;
+        } else {
+          cell.className = "rounded-xl bg-zinc-900/40 border border-zinc-800/60 p-2 sm:p-2.5 flex flex-col justify-between text-zinc-600 hover:border-zinc-700 transition-colors min-h-[165px] sm:min-h-[185px]";
+          cell.innerHTML = `
+            <span class="font-mono text-xs font-bold text-zinc-500">${dayNum}</span>
+            <div class="text-center py-4">
+              <span class="text-[10px] font-medium text-zinc-600">Free Cinema Night</span>
+            </div>
+            <div class="text-[9px] text-zinc-600 text-right">No pick</div>
+          `;
+        }
+        container.appendChild(cell);
+      }
+    }
+
+    function renderVaultGrid() {
+      const container = document.getElementById('vault-grid');
+      container.innerHTML = '';
+
+      const filtered = WATCHED_LIST.filter(item => {
+        if (currentVaultFilter === 'movie') return item.type === 'movie';
+        if (currentVaultFilter === 'series') return item.type === 'series';
+        if (currentVaultFilter === 'malayalam') return item.tag === 'Malayalam';
+        if (currentVaultFilter === 'survival') return item.tag === 'Survival' || item.tag === 'War';
+        if (currentVaultFilter === 'horror') return item.tag === 'Horror';
+        return true;
+      });
+
+      document.getElementById('vault-count-badge').innerText = `${filtered.length} Titles`;
+      document.getElementById('nav-watched-count').innerText = WATCHED_LIST.length;
+
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "poster-card bg-ncard border border-nborder rounded-xl overflow-hidden cursor-pointer hover:border-zinc-500 transition-all group";
+        card.onclick = () => openDetailModalFromVault(item);
+
+        card.innerHTML = `
+          <div class="relative aspect-[2/3] bg-zinc-900 overflow-hidden">
+            <img src="${item.poster}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <div class="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-black/85 text-yellow-400 text-[10px] font-mono font-bold flex items-center gap-0.5">
+              ★ ${item.imdb}
+            </div>
+            <div class="absolute bottom-0 inset-x-0 p-2.5 bg-gradient-to-t from-black via-black/80 to-transparent">
+              <h5 class="text-xs font-bold text-white truncate drop-shadow">${item.title}</h5>
+              <div class="flex items-center justify-between text-[10px] text-zinc-400 pt-0.5">
+                <span class="truncate">${item.platform}</span>
+                <span class="text-red-400">🍅 ${item.rt}</span>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function switchView(viewName) {
+      document.getElementById('view-spotlight').classList.add('hidden');
+      document.getElementById('view-calendar').classList.add('hidden');
+      document.getElementById('view-vault').classList.add('hidden');
+
+      ['spotlight', 'calendar', 'vault'].forEach(v => {
+        const btn = document.getElementById(`tab-${v}`);
+        if (btn) {
+          btn.className = (v === viewName)
+            ? "px-3.5 py-1.5 rounded-md bg-nred text-white shadow font-bold"
+            : "px-3.5 py-1.5 rounded-md text-zinc-400 hover:text-white transition-all";
+        }
+      });
+
+      document.getElementById(`view-${viewName}`).classList.remove('hidden');
+    }
+
+    function filterVault(filter) {
+      currentVaultFilter = filter;
+      ['all', 'movie', 'series', 'malayalam', 'survival', 'horror'].forEach(k => {
+        const btn = document.getElementById(`vf-${k}`);
+        if (btn) {
+          btn.className = (k === filter)
+            ? "px-3 py-1 rounded bg-white text-black font-bold"
+            : "px-3 py-1 rounded bg-zinc-800 text-zinc-300 hover:text-white";
+        }
+      });
+      renderVaultGrid();
+    }
+
+    function playTrailerById(id) {
+      const movie = SCHEDULE_ITEMS.find(m => m.id === id);
+      if (!movie || !movie.youtubeId) {
+        showToast("Trailer not available");
+        return;
+      }
+      playChime(659.25, 0.1);
+      document.getElementById('trailer-title').innerText = `${movie.title} (${movie.year}) — Official Trailer`;
+      document.getElementById('trailer-iframe').src = `https://www.youtube.com/embed/${movie.youtubeId}?autoplay=1`;
+
+      const modal = document.getElementById('trailer-modal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function closeTrailerModal() {
+      const modal = document.getElementById('trailer-modal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      document.getElementById('trailer-iframe').src = "";
+    }
+
+    function openDetailModal(id) {
+      const match = SCHEDULE_ITEMS.find(s => s.id === id);
+      if (!match) return;
+
+      document.getElementById('m-poster').src = match.poster;
+      document.getElementById('m-title').innerText = `${match.title} (${match.year})`;
+      document.getElementById('m-date-badge').innerText = `Sep ${match.day}, 2026`;
+      document.getElementById('m-tag').innerText = match.tag;
+      document.getElementById('m-sub').innerText = `${match.platform} • ${match.runtime}`;
+      document.getElementById('m-imdb').innerText = match.imdb;
+      document.getElementById('m-rt').innerText = match.rt;
+      document.getElementById('m-runtime').innerText = match.runtime;
+      document.getElementById('m-platform').innerText = match.platform;
+      document.getElementById('m-synopsis').innerText = match.synopsis;
+
+      const hindiBox = document.getElementById('m-hindi-box');
+      if (match.hindiNotes) {
+        hindiBox.classList.remove('hidden');
+        document.getElementById('m-hindi-notes').innerText = match.hindiNotes;
+      } else {
+        hindiBox.classList.add('hidden');
+      }
+
+      const expiryBox = document.getElementById('m-expiry-box');
+      if (match.tag.includes('Leaves')) {
+        expiryBox.classList.remove('hidden');
+        document.getElementById('m-expiry-text').innerText = `Impending Removal: ${match.tag}`;
+      } else {
+        expiryBox.classList.add('hidden');
+      }
+
+      document.getElementById('m-notes').innerText = match.notes || "No personal curator notes.";
+
+      document.getElementById('btn-modal-trailer').onclick = () => {
+        closeDetailModal();
+        playTrailerById(match.id);
+      };
+
+      document.getElementById('btn-modal-watch').onclick = () => {
+        markMovieWatched(match.id);
+        closeDetailModal();
+      };
+
+      const modal = document.getElementById('detail-modal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function openDetailModalFromVault(item) {
+      document.getElementById('m-poster').src = item.poster;
+      document.getElementById('m-title').innerText = `${item.title} (${item.year})`;
+      document.getElementById('m-date-badge').innerText = `Watched Diary`;
+      document.getElementById('m-tag').innerText = item.tag;
+      document.getElementById('m-sub').innerText = `${item.platform} • Completed`;
+      document.getElementById('m-imdb').innerText = item.imdb || "8.0";
+      document.getElementById('m-rt').innerText = item.rt || "90%";
+      document.getElementById('m-runtime').innerText = "Logged";
+      document.getElementById('m-platform').innerText = item.platform;
+      document.getElementById('m-synopsis').innerText = item.notes;
+      document.getElementById('m-hindi-box').classList.add('hidden');
+      document.getElementById('m-expiry-box').classList.add('hidden');
+      document.getElementById('m-notes').innerText = item.notes;
+
+      document.getElementById('btn-modal-trailer').classList.add('hidden');
+      document.getElementById('btn-modal-watch').onclick = () => {
+        closeDetailModal();
+        showToast(`Already logged in Watched Vault!`);
+      };
+
+      const modal = document.getElementById('detail-modal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function closeDetailModal() {
+      const modal = document.getElementById('detail-modal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      document.getElementById('btn-modal-trailer').classList.remove('hidden');
+    }
+
+    function triggerShuffleWithSound() {
+      const dice = document.getElementById('spin-dice');
+      const icon = document.getElementById('shuffle-icon');
+      
+      icon.classList.add('roulette-active');
+      setTimeout(() => icon.classList.remove('roulette-active'), 700);
+
+      // Play audio ticks
+      playChime(440, 0.05);
+      setTimeout(() => playChime(554.37, 0.05), 100);
+      setTimeout(() => playChime(659.25, 0.05), 200);
+      setTimeout(() => playChime(880, 0.12), 320);
+
+      // Pick randomly from upcoming active titles
+      const pool = SCHEDULE_ITEMS.filter(s => s.status !== 'dropped');
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      currentShuffledMovie = pick;
+
+      document.getElementById('shuf-title').innerText = `${pick.title} (${pick.year})`;
+      document.getElementById('shuf-tag').innerText = pick.tag;
+      document.getElementById('shuf-imdb').innerText = pick.imdb;
+      document.getElementById('shuf-rt').innerText = pick.rt.split('/')[0].trim();
+      document.getElementById('shuf-platform').innerText = `${pick.platform} • ${pick.runtime}`;
+
+      const sModal = document.getElementById('shuffle-modal');
+      sModal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function lockShufflePick() {
+      if (!currentShuffledMovie) return;
+      const modal = document.getElementById('shuffle-modal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+
+      // Set featured billboard to this pick!
+      setFeaturedMovie(currentShuffledMovie.id);
+      switchView('spotlight');
+      showToast(`Locked in "${currentShuffledMovie.title}" for Tonight!`);
+      playChime(880, 0.15);
+    }
+
+    function markMovieWatched(id) {
+      const match = SCHEDULE_ITEMS.find(s => s.id === id);
+      if (!match) return;
+
+      match.status = "watched";
+      match.tag = "Watched";
+      match.tagColor = "bg-emerald-700";
+
+      WATCHED_LIST.unshift({
+        title: match.title,
+        year: match.year,
+        type: "movie",
+        platform: match.platform,
+        rating: 5,
+        imdb: match.imdb,
+        rt: match.rt,
+        tag: "Watched",
+        poster: match.poster,
+        notes: `Watched on September ${match.day}.`
+      });
+
+      renderCalendarGrid();
+      renderUpcomingRail();
+      renderVaultGrid();
+      showToast(`Logged "${match.title}" into Watched Diary!`);
+      playChime(523.25, 0.15);
+    }
+
+    function markFeaturedWatched() {
+      markMovieWatched(currentFeaturedId);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-text').innerText = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2500);
+    }
+  </script>
+</body>
+</html>
