@@ -663,24 +663,6 @@
 
         <p id="m-synopsis" class="text-zinc-300 leading-relaxed text-xs sm:text-xs"></p>
 
-        <!-- Mapped Trailer URL & Cloud Mapping Input -->
-        <div class="p-2.5 rounded-lg bg-zinc-900/90 border border-nborder space-y-1.5 text-xs">
-          <div class="flex items-center justify-between text-[11px]">
-            <span class="font-bold text-zinc-300 flex items-center gap-1">
-              <span>🔗</span> Mapped YouTube Trailer URL
-            </span>
-            <a id="m-trailer-link" href="#" target="_blank" class="text-red-400 hover:text-red-300 font-bold flex items-center gap-0.5">
-              <span>Open on YouTube</span> ↗
-            </a>
-          </div>
-          <div class="flex items-center gap-2">
-            <input id="input-m-trailer-url" type="text" placeholder="https://www.youtube.com/watch?v=..." 
-                   class="flex-1 bg-black/70 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-[11px] text-white focus:outline-none focus:border-red-500 font-mono">
-            <button onclick="saveMappedTrailerForMovie()" class="px-2.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold text-[10px] shrink-0 transition-colors shadow">
-              Save & Cloud Sync
-            </button>
-          </div>
-        </div>
 
         <div id="m-hindi-box" class="hidden p-2.5 rounded-lg bg-blue-950/40 border border-blue-800/40 text-blue-200 text-xs space-y-0.5">
           <span class="font-bold flex items-center gap-1.5 text-blue-300">🗣️ Conversational Hindi Context</span>
@@ -2364,15 +2346,6 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       document.getElementById('m-platform').innerText = match.platform;
       document.getElementById('m-synopsis').innerText = match.synopsis;
 
-      const currentUrl = match.trailer_url || match.trailerUrl || (match.youtubeId ? `https://www.youtube.com/watch?v=${match.youtubeId}` : '');
-      const trailerInput = document.getElementById('input-m-trailer-url');
-      const trailerLink = document.getElementById('m-trailer-link');
-      if (trailerInput) trailerInput.value = currentUrl;
-      if (trailerLink) {
-        trailerLink.href = currentUrl || '#';
-        trailerLink.classList.toggle('pointer-events-none', !currentUrl);
-        trailerLink.classList.toggle('opacity-50', !currentUrl);
-      }
 
       const hindiBox = document.getElementById('m-hindi-box');
       if (match.hindiNotes) {
@@ -2411,52 +2384,6 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
 
       const modal = document.getElementById('detail-modal');
       modal.classList.remove('opacity-0', 'pointer-events-none');
-    }
-
-    async function saveMappedTrailerForMovie() {
-      if (!currentDetailMovieId) return;
-      const input = document.getElementById('input-m-trailer-url');
-      if (!input) return;
-      const rawVal = input.value.trim();
-      const cleanId = extractYouTubeId(rawVal);
-      if (!cleanId) {
-        showToast("Please enter a valid YouTube trailer URL or ID");
-        return;
-      }
-      const fullUrl = rawVal.startsWith('http') ? rawVal : `https://www.youtube.com/watch?v=${cleanId}`;
-
-      const sched = SCHEDULE_ITEMS.find(s => s.id === currentDetailMovieId);
-      if (sched) {
-        sched.youtubeId = cleanId;
-        sched.trailer_url = fullUrl;
-      }
-
-      if (!MOVIE_DATABASE_INDEX[currentDetailMovieId] && sched) {
-        MOVIE_DATABASE_INDEX[currentDetailMovieId] = { ...sched };
-      }
-      if (MOVIE_DATABASE_INDEX[currentDetailMovieId]) {
-        MOVIE_DATABASE_INDEX[currentDetailMovieId].youtubeId = cleanId;
-        MOVIE_DATABASE_INDEX[currentDetailMovieId].trailer_url = fullUrl;
-        saveMovieIndex(MOVIE_DATABASE_INDEX);
-      }
-
-      if (currentFeaturedId === currentDetailMovieId) {
-        updateHeroTrailer(cleanId);
-      }
-
-      const trailerLink = document.getElementById('m-trailer-link');
-      if (trailerLink) {
-        trailerLink.href = fullUrl;
-        trailerLink.classList.remove('pointer-events-none', 'opacity-50');
-      }
-
-      const movieObj = MOVIE_DATABASE_INDEX[currentDetailMovieId] || sched;
-      if (movieObj) {
-        await syncMovieToCloud(movieObj);
-      }
-
-      showToast(`Mapped trailer URL saved for ID ${currentDetailMovieId} & synced!`);
-      playChime(659.25, 0.1);
     }
 
     function openDetailModalFromVault(item) {
