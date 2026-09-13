@@ -235,11 +235,9 @@
           <!-- Title & Badges -->
           <div class="space-y-1.5">
             <h2 id="feat-title" class="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight drop-shadow-md">
-              Stree (2018)
+              Featured Movie
             </h2>
-            <p id="feat-tagline" class="text-xs sm:text-sm text-zinc-300 font-medium italic">
-              "O Stree Kal Aana..." — The cult horror-comedy on small-town folklore and paranoia.
-            </p>
+            <p id="feat-tagline" class="text-xs sm:text-sm text-zinc-300 font-medium italic"></p>
           </div>
 
           <!-- Ratings Row (IMDb & Rotten Tomatoes) -->
@@ -412,7 +410,14 @@
       </div>
 
       <!-- Legal Notice & Fair Use Declaration -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-[11px] leading-relaxed text-zinc-400">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-[11px] leading-relaxed text-zinc-400">
+        <div class="space-y-1.5">
+          <h5 class="text-xs font-bold text-zinc-200 uppercase tracking-wider">Open Data Sources</h5>
+          <p>
+            Descriptions, synopses, and metadata are sourced strictly from open community platforms: <strong>TMDB</strong> under Creative Commons (CC BY-NC 4.0), <strong>Wikidata</strong> (CC0/CC BY-SA), and non-copyrightable factual plot outlines.
+          </p>
+        </div>
+
         <div class="space-y-1.5">
           <h5 class="text-xs font-bold text-zinc-200 uppercase tracking-wider">Non-Commercial Fair Use</h5>
           <p>
@@ -2094,6 +2099,11 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
         dialectTag.classList.remove('hidden');
       } else {
         dialectTag.classList.add('hidden');
+      }
+
+      const taglineEl = document.getElementById('feat-tagline');
+      if (taglineEl) {
+        taglineEl.innerText = movie.tagline || (movie.genre ? `${movie.genre} • ${movie.platform}` : `${movie.platform}`);
       }
 
       // Auto-play the trailer/teaser in ambient hero marquee
