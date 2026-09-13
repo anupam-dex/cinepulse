@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -174,32 +175,32 @@
         <!-- Backdrop Banner with Autoplay YouTube Trailer -->
         <div class="relative h-[380px] sm:h-[460px] md:h-[520px] w-full overflow-hidden bg-black">
           
-          <!-- Embedded Ambient Autoplay YouTube Trailer Player -->
-          <div class="absolute -inset-1 pointer-events-none overflow-hidden scale-110">
-            <iframe id="feat-trailer-iframe" 
-                    src="" 
-                    class="w-full h-full border-0 pointer-events-none"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen></iframe>
+          <!-- Fallback Poster Backdrop (Base Layer) -->
+          <img id="feat-backdrop" src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1400&auto=format&fit=crop&q=85" 
+               alt="Hero Backdrop" class="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.7] scale-105 transition-all duration-700 pointer-events-none">
+
+          <!-- Autoplay Video Player Wrapper (Placed above poster, seamlessly fades in when playing) -->
+          <div id="hero-player-wrap" class="absolute inset-0 overflow-hidden flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-700">
+            <div id="feat-trailer-player" class="w-[115%] h-[115%] min-w-[100vw] min-h-[56.25vw] pointer-events-none"></div>
           </div>
 
-          <!-- Fallback Poster Backdrop (transitions out when video plays) -->
-          <img id="feat-backdrop" src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1400&auto=format&fit=crop&q=85" 
-               alt="Hero Backdrop" class="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.7] scale-105 transition-all duration-700 pointer-events-none opacity-40">
-          
           <!-- Cinematic Vignettes & Gradients -->
-          <div class="absolute inset-0 bg-gradient-to-t from-[#13151b] via-[#13151b]/70 to-transparent pointer-events-none"></div>
-          <div class="absolute inset-0 bg-gradient-to-r from-[#13151b] via-[#13151b]/80 to-transparent pointer-events-none"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-[#13151b] via-[#13151b]/70 to-transparent pointer-events-none z-10"></div>
+          <div class="absolute inset-0 bg-gradient-to-r from-[#13151b] via-[#13151b]/80 to-transparent pointer-events-none z-10"></div>
 
           <!-- Top-Right Autoplay Trailer Controls -->
-          <div class="absolute top-4 right-4 z-20 flex items-center gap-2">
+          <div class="absolute top-4 right-4 z-30 flex items-center gap-2">
+            <button id="btn-hero-play-trigger" onclick="forcePlayHeroTrailer()" class="hidden px-3 py-1 rounded-full bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg transition-transform active:scale-95 animate-pulse cursor-pointer">
+              <span>▶</span> Click to Start Video
+            </button>
+
             <div class="px-2.5 py-1 rounded-full bg-black/80 backdrop-blur border border-red-500/50 text-[10px] font-bold text-red-400 flex items-center gap-1.5 shadow-lg">
               <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
               <span id="trailer-status-badge">AUTOPLAYING TEASER</span>
             </div>
 
             <!-- Audio Mute/Unmute Toggle Button -->
-            <button id="btn-hero-audio" onclick="toggleHeroAudio()" class="px-3 py-1 rounded-full bg-black/80 hover:bg-black text-white text-xs font-bold border border-zinc-700/80 flex items-center gap-1.5 shadow-lg transition-transform active:scale-95">
+            <button id="btn-hero-audio" onclick="toggleHeroAudio()" class="px-3 py-1 rounded-full bg-black/80 hover:bg-black text-white text-xs font-bold border border-zinc-700/80 flex items-center gap-1.5 shadow-lg transition-transform active:scale-95 cursor-pointer">
               <span id="hero-audio-icon">🔊</span>
               <span id="hero-audio-text">Unmute</span>
             </button>
@@ -1217,40 +1218,145 @@
     // ==========================================
     // 4. AUTOPLAYING YOUTUBE TRAILER ON HERO
     // ==========================================
+    // 4. AUTOPLAYING YOUTUBE TRAILER ON HERO (Official YouTube Iframe API)
+    // ==========================================
+    let heroPlayer = null;
+    let isHeroPlayerReady = false;
     let isHeroMuted = true;
+    let currentHeroYoutubeId = "gzea5Na24B8";
 
-    function updateHeroTrailer(youtubeId) {
-      const iframe = document.getElementById('feat-trailer-iframe');
-      if (!youtubeId) {
-        iframe.src = "";
+    window.onYouTubeIframeAPIReady = function() {
+      initHeroPlayer(currentHeroYoutubeId);
+    };
+
+    function initHeroPlayer(youtubeId) {
+      if (!youtubeId) return;
+      currentHeroYoutubeId = youtubeId;
+
+      if (!window.YT || !window.YT.Player) {
+        setTimeout(() => initHeroPlayer(youtubeId), 200);
         return;
       }
-      // Autoplay muted in loop
-      iframe.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${youtubeId}&modestbranding=1&playsinline=1&enablejsapi=1&rel=0`;
-      isHeroMuted = true;
-      updateHeroAudioButtonUI();
+
+      const playerTarget = document.getElementById('feat-trailer-player');
+      if (!playerTarget) return;
+
+      if (heroPlayer && typeof heroPlayer.loadVideoById === 'function') {
+        try {
+          heroPlayer.loadVideoById({
+            videoId: youtubeId,
+            startSeconds: 0
+          });
+          heroPlayer.mute();
+          heroPlayer.playVideo();
+          return;
+        } catch(e) {
+          console.warn("Could not reload video in existing player", e);
+        }
+      }
+
+      try {
+        heroPlayer = new YT.Player('feat-trailer-player', {
+          videoId: youtubeId,
+          playerVars: {
+            autoplay: 1,
+            mute: 1,
+            controls: 0,
+            loop: 1,
+            playlist: youtubeId,
+            playsinline: 1,
+            rel: 0,
+            modestbranding: 1,
+            showinfo: 0,
+            iv_load_policy: 3,
+            disablekb: 1,
+            fs: 0
+          },
+          events: {
+            onReady: (event) => {
+              isHeroPlayerReady = true;
+              event.target.mute();
+              event.target.playVideo();
+              updateHeroAudioButtonUI();
+            },
+            onStateChange: (event) => {
+              const wrap = document.getElementById('hero-player-wrap');
+              const triggerBtn = document.getElementById('btn-hero-play-trigger');
+              const badge = document.getElementById('trailer-status-badge');
+
+              if (event.data === YT.PlayerState.PLAYING) {
+                if (wrap) wrap.classList.remove('opacity-0');
+                if (triggerBtn) triggerBtn.classList.add('hidden');
+                if (badge) {
+                  badge.innerText = "STREAMING TRAILER";
+                  badge.classList.remove('text-amber-400');
+                  badge.classList.add('text-red-400');
+                }
+              } else if (event.data === YT.PlayerState.PAUSED || event.data === -1) {
+                if (triggerBtn) triggerBtn.classList.remove('hidden');
+              } else if (event.data === YT.PlayerState.ENDED) {
+                event.target.playVideo();
+              }
+            },
+            onError: (event) => {
+              console.warn("Hero trailer embed restriction code:", event.data);
+              const badge = document.getElementById('trailer-status-badge');
+              if (badge) {
+                badge.innerText = "STUDIO TRAILER PREVIEW";
+                badge.classList.add('text-amber-400');
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.warn("Error creating YT.Player", err);
+      }
+    }
+
+    function updateHeroTrailer(youtubeId) {
+      currentHeroYoutubeId = youtubeId;
+      initHeroPlayer(youtubeId);
+    }
+
+    function forcePlayHeroTrailer() {
+      if (heroPlayer && isHeroPlayerReady) {
+        heroPlayer.mute();
+        heroPlayer.playVideo();
+      }
+      const triggerBtn = document.getElementById('btn-hero-play-trigger');
+      if (triggerBtn) triggerBtn.classList.add('hidden');
     }
 
     function toggleHeroAudio() {
-      const iframe = document.getElementById('feat-trailer-iframe');
-      if (!iframe || !iframe.contentWindow) return;
+      if (!heroPlayer || !isHeroPlayerReady) {
+        showToast("Trailer player still loading...");
+        return;
+      }
 
-      isHeroMuted = !isHeroMuted;
-      const cmd = isHeroMuted ? 'mute' : 'unMute';
-      iframe.contentWindow.postMessage(JSON.stringify({
-        event: 'command',
-        func: cmd,
-        args: []
-      }), '*');
-
+      try {
+        if (heroPlayer.isMuted()) {
+          heroPlayer.unMute();
+          heroPlayer.setVolume(100);
+          isHeroMuted = false;
+          showToast("Trailer audio unmuted! 🔊");
+        } else {
+          heroPlayer.mute();
+          isHeroMuted = true;
+          showToast("Trailer audio muted");
+        }
+      } catch(e) {
+        console.warn("Audio toggle error", e);
+      }
       updateHeroAudioButtonUI();
-      showToast(isHeroMuted ? "Trailer audio muted" : "Trailer audio playing! 🔊");
     }
 
     function updateHeroAudioButtonUI() {
       const icon = document.getElementById('hero-audio-icon');
       const txt = document.getElementById('hero-audio-text');
-      if (isHeroMuted) {
+      if (!icon || !txt) return;
+
+      const isMuted = heroPlayer && isHeroPlayerReady ? heroPlayer.isMuted() : isHeroMuted;
+      if (isMuted) {
         icon.innerText = "🔊";
         txt.innerText = "Unmute";
       } else {
@@ -1258,6 +1364,17 @@
         txt.innerText = "Mute";
       }
     }
+
+    document.addEventListener('click', () => {
+      if (heroPlayer && isHeroPlayerReady) {
+        try {
+          if (heroPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
+            heroPlayer.mute();
+            heroPlayer.playVideo();
+          }
+        } catch (e) {}
+      }
+    }, { once: true });
 
     // ==========================================
     // 5. MASTER CALENDAR & WATCHED VAULT
