@@ -307,9 +307,9 @@
 
           <!-- Action Buttons -->
           <div class="pt-3 flex flex-wrap items-center gap-3">
-            <button onclick="playHeroTrailerDirectly()" class="px-6 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black font-black text-xs sm:text-sm flex items-center gap-2.5 shadow-xl shadow-white/10 transition-transform hover:scale-105 active:scale-95" title="Play trailer directly in featuring background">
+            <button onclick="openStreamingModal(currentFeaturedId)" class="px-6 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black font-black text-xs sm:text-sm flex items-center gap-2.5 shadow-xl shadow-white/10 transition-transform hover:scale-105 active:scale-95 cursor-pointer" title="Stream this movie via legitimate online options">
               <span class="text-red-600 text-base">▶</span>
-              <span>Play in Background</span>
+              <span>Play</span>
             </button>
             <button id="btn-add-watchlist" onclick="addFeaturedToWatchlist(event)" 
                     class="px-4 py-3 rounded-xl bg-gradient-to-r from-red-600/90 to-rose-600/90 hover:from-red-500 hover:to-rose-500 text-white font-bold text-xs sm:text-sm border border-red-500/40 shadow-lg shadow-red-950/40 flex items-center gap-2 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer group" 
@@ -643,26 +643,104 @@
     </div>
   </div>
 
-  <!-- Interactive YouTube Trailer Modal -->
-  <div id="trailer-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-200">
-    <div class="relative w-full max-w-4xl bg-nsurface rounded-2xl overflow-hidden shadow-2xl border border-nborder">
-      <div class="p-3.5 bg-zinc-900 border-b border-nborder flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="text-red-500 font-bold">▶</span>
-          <h4 id="trailer-title" class="text-sm font-bold text-white truncate">Movie Trailer</h4>
+  <!-- Legitimate Online Streaming & Watch Modal -->
+  <div id="streaming-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-200 overflow-y-auto">
+    <div class="relative w-full max-w-4xl bg-zinc-950 rounded-2xl overflow-hidden shadow-2xl border border-zinc-800 text-zinc-200 my-auto flex flex-col max-h-[92vh]">
+      
+      <!-- Top Header Bar -->
+      <div class="p-4 bg-zinc-900/90 border-b border-zinc-800 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div class="w-8 h-8 rounded-lg bg-red-600/20 border border-red-600/30 flex items-center justify-center text-red-500 font-bold text-sm shrink-0">
+            ▶
+          </div>
+          <div class="truncate">
+            <div class="flex items-center gap-2">
+              <h4 id="stream-modal-title" class="text-sm sm:text-base font-black text-white truncate">Movie Title</h4>
+              <span id="stream-modal-year" class="text-xs text-zinc-400 font-medium shrink-0">(2024)</span>
+            </div>
+            <p class="text-[11px] text-zinc-400 truncate flex items-center gap-1.5">
+              <span id="stream-modal-meta">2h 08m • Horror/Comedy</span>
+              <span>•</span>
+              <span class="text-emerald-400 font-semibold inline-flex items-center gap-1">
+                <span>🛡️</span> 100% Legal Streaming
+              </span>
+            </p>
+          </div>
         </div>
-        <div class="flex items-center gap-3">
-          <a id="trailer-direct-link" href="#" target="_blank" class="text-xs text-red-400 hover:text-red-300 font-bold flex items-center gap-1">
-            <span>↗</span> Open on YouTube
-          </a>
-          <button onclick="closeTrailerModal()" class="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white flex items-center justify-center text-xs font-bold transition-colors">
+
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="closeStreamingModal()" class="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer" title="Close streaming window (Esc)">
             ✕
           </button>
         </div>
       </div>
 
-      <div class="relative aspect-video w-full bg-black">
-        <iframe id="trailer-iframe" src="" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      <!-- Scrollable Modal Body -->
+      <div class="overflow-y-auto p-4 sm:p-5 space-y-5 custom-scrollbar">
+        
+        <!-- Embedded High-Definition Official Studio Stream / Trailer Player -->
+        <div class="space-y-2">
+          <div class="relative aspect-video w-full bg-black rounded-xl overflow-hidden border border-zinc-800 shadow-xl">
+            <iframe id="stream-modal-iframe" 
+                    src="" 
+                    class="w-full h-full border-0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen>
+            </iframe>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] text-zinc-400">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-mono text-[10px] uppercase font-semibold">1080p Studio Preview</span>
+              <span>Official Licensed Preview Player</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <button onclick="streamInHeroBackground()" class="hover:text-white text-zinc-400 flex items-center gap-1 transition-colors cursor-pointer" title="Play ambient stream directly in featuring background">
+                <span>🖥️</span> Stream in Hero Background
+              </button>
+              <a id="stream-modal-yt-direct" href="#" target="_blank" rel="noopener noreferrer" class="hover:text-red-400 text-zinc-400 flex items-center gap-1 transition-colors">
+                <span>↗</span> Open YouTube Studio
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legitimate Streaming Platforms Section -->
+        <div class="bg-zinc-900/60 rounded-xl p-4 border border-zinc-800/80 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h5 class="text-xs sm:text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <span>🌐</span> Legitimate Online Streaming Providers
+              </h5>
+              <p class="text-[11px] text-zinc-400">
+                100% legal & authorized streaming options. Direct official platform deep links:
+              </p>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-800 text-emerald-300 hidden sm:inline-block">
+              Zero Piracy / Open Data
+            </span>
+          </div>
+
+          <!-- Dynamic Platform Links Grid -->
+          <div id="stream-platforms-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <!-- Populated via JavaScript -->
+          </div>
+        </div>
+
+        <!-- Direct Quick Actions & Verified Source Info -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-zinc-800/60 text-xs text-zinc-400">
+          <div class="flex items-center gap-3">
+            <button id="stream-btn-mark-watched" onclick="markCurrentStreamWatched()" class="px-3.5 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-semibold transition-colors flex items-center gap-1.5 cursor-pointer">
+              <span class="text-emerald-400 font-bold">✓</span> Mark as Watched
+            </button>
+            <button id="stream-btn-add-watchlist" onclick="addCurrentStreamToWatchlist(event)" class="px-3.5 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-semibold transition-colors flex items-center gap-1.5 cursor-pointer">
+              <span>🔖</span> Add to Watchlist
+            </button>
+          </div>
+          <div class="text-[11px] text-zinc-400 flex items-center gap-1">
+            <span>ℹ️</span> Licensed streaming availability subject to regional catalog permissions.
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -725,8 +803,8 @@
             <button id="btn-modal-feature" class="px-3.5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow">
               <span>★</span> Tonight's Feature
             </button>
-            <button id="btn-modal-trailer" class="px-3.5 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-bold text-xs flex items-center gap-1.5 transition-all shadow">
-              <span>▶</span> Trailer
+            <button id="btn-modal-trailer" class="px-3.5 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-bold text-xs flex items-center gap-1.5 transition-all shadow cursor-pointer">
+              <span>▶</span> Play / Stream
             </button>
             <button id="btn-modal-watch" class="px-3.5 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs transition-colors shadow">
               ✓ Watched
@@ -2326,15 +2404,16 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       };
     }
 
-    function addFeaturedToWatchlist(event) {
-      const movie = SCHEDULE_ITEMS.find(s => s.id === currentFeaturedId) || MOVIE_DATABASE_INDEX[currentFeaturedId];
+    function addFeaturedToWatchlist(event, targetMovieId) {
+      const activeId = targetMovieId || currentFeaturedId;
+      const movie = SCHEDULE_ITEMS.find(s => s.id === activeId) || MOVIE_DATABASE_INDEX[activeId];
       if (!movie) {
         showToast("Select a movie to add to watchlist");
         return;
       }
 
       const sourceEl = event && event.currentTarget ? event.currentTarget : document.getElementById('btn-add-watchlist');
-      const existing = SCHEDULE_ITEMS.find(s => s.id === currentFeaturedId);
+      const existing = SCHEDULE_ITEMS.find(s => s.id === activeId);
 
       if (existing) {
         // Already in schedule, play the animation into calendar tab and highlight it
@@ -2354,7 +2433,7 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
 
       // Create new scheduled watchlist movie entry
       const newWatchlistItem = {
-        id: movie.id,
+        id: activeId,
         day: targetDay,
         title: movie.title,
         year: movie.year || 2024,
@@ -2658,36 +2737,288 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
     }
 
     let currentDetailMovieId = null;
+    let currentStreamingMovie = null;
 
-    function playTrailerInModal(id) {
-      const movie = SCHEDULE_ITEMS.find(m => m.id === id) || MOVIE_DATABASE_INDEX[id];
+    function openStreamingModal(id) {
+      let movie = null;
+      if (typeof id === 'object' && id !== null) {
+        movie = id;
+      } else if (id) {
+        movie = SCHEDULE_ITEMS.find(s => s.id === id) || MOVIE_DATABASE_INDEX[id] || WATCHED_LIST.find(w => w.id === id);
+      }
       if (!movie) {
-        showToast("Trailer not available");
+        movie = SCHEDULE_ITEMS.find(s => s.id === currentFeaturedId) || MOVIE_DATABASE_INDEX[currentFeaturedId] || SCHEDULE_ITEMS[0];
+      }
+      if (!movie) {
+        showToast("Streaming options not available for this title");
         return;
       }
+
+      currentStreamingMovie = movie;
+      playChime(659.25, 0.1);
+
+      // Populate Title, Year, Meta
+      const titleEl = document.getElementById('stream-modal-title');
+      const yearEl = document.getElementById('stream-modal-year');
+      const metaEl = document.getElementById('stream-modal-meta');
+
+      if (titleEl) titleEl.innerText = movie.title || "Movie";
+      if (yearEl) yearEl.innerText = movie.year ? `(${movie.year})` : "";
+      
+      const parts = [];
+      if (movie.runtime) parts.push(movie.runtime);
+      if (movie.genre) parts.push(movie.genre);
+      if (movie.imdb) parts.push(`IMDb ${movie.imdb}`);
+      if (movie.rt) parts.push(`🍅 ${movie.rt}`);
+      if (metaEl) metaEl.innerText = parts.join(' • ') || "Featured Cinema";
+
+      // Populate Embedded Streaming Player
       const rawYt = movie.trailer_url || movie.trailerUrl || movie.youtubeId;
       const cleanId = extractYouTubeId(rawYt);
-      if (!cleanId) {
-        showToast("Trailer not available");
-        return;
-      }
-      playChime(659.25, 0.1);
-      document.getElementById('trailer-title').innerText = `${movie.title} (${movie.year}) — Official Trailer`;
-      document.getElementById('trailer-iframe').src = `https://www.youtube-nocookie.com/embed/${cleanId}?autoplay=1&rel=0&playsinline=1`;
+      const iframe = document.getElementById('stream-modal-iframe');
+      const directLink = document.getElementById('stream-modal-yt-direct');
 
-      const directLink = document.getElementById('trailer-direct-link');
-      if (directLink) {
-        directLink.href = movie.trailer_url || `https://www.youtube.com/watch?v=${cleanId}`;
+      if (cleanId && iframe) {
+        iframe.src = `https://www.youtube-nocookie.com/embed/${cleanId}?autoplay=1&rel=0&playsinline=1&modestbranding=1`;
+        if (directLink) {
+          directLink.href = movie.trailer_url || `https://www.youtube.com/watch?v=${cleanId}`;
+          directLink.classList.remove('hidden');
+        }
+      } else if (iframe) {
+        iframe.src = "";
+        if (directLink) directLink.classList.add('hidden');
       }
 
-      const modal = document.getElementById('trailer-modal');
-      modal.classList.remove('opacity-0', 'pointer-events-none');
+      // Populate Legitimate Streaming Platforms
+      renderStreamingPlatforms(movie);
+
+      // Show Modal
+      const modal = document.getElementById('streaming-modal');
+      if (modal) {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    function closeStreamingModal() {
+      const modal = document.getElementById('streaming-modal');
+      if (modal) {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+      }
+      const iframe = document.getElementById('stream-modal-iframe');
+      if (iframe) {
+        iframe.src = "";
+      }
+    }
+
+    function renderStreamingPlatforms(movie) {
+      const grid = document.getElementById('stream-platforms-grid');
+      if (!grid) return;
+      grid.innerHTML = "";
+
+      const title = movie.title || "";
+      const encodedTitle = encodeURIComponent(title);
+      const platformStr = (movie.platform || "").toLowerCase();
+
+      const providers = [];
+
+      // 1. Netflix
+      if (platformStr.includes('netflix')) {
+        providers.push({
+          name: 'Netflix',
+          badge: 'Subscription Plan',
+          badgeClass: 'bg-red-950/90 text-red-300 border-red-800/80',
+          desc: 'Watch in Ultra HD 4K & Dolby Audio',
+          btnText: 'Stream on Netflix ↗',
+          btnClass: 'bg-red-600 hover:bg-red-500 text-white',
+          url: `https://www.netflix.com/search?q=${encodedTitle}`,
+          icon: '🔴'
+        });
+      }
+
+      // 2. JioCinema
+      if (platformStr.includes('jio') || platformStr.includes('jiocinema')) {
+        providers.push({
+          name: 'JioCinema',
+          badge: 'Free / Premium Plan',
+          badgeClass: 'bg-pink-950/90 text-pink-300 border-pink-800/80',
+          desc: 'Official streaming catalog in Full HD',
+          btnText: 'Watch on JioCinema ↗',
+          btnClass: 'bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white',
+          url: `https://www.jiocinema.com/search/${encodedTitle}`,
+          icon: '🟣'
+        });
+      }
+
+      // 3. Amazon Prime Video
+      if (platformStr.includes('prime') || platformStr.includes('amazon')) {
+        providers.push({
+          name: 'Amazon Prime Video',
+          badge: 'Included with Prime / Rent',
+          badgeClass: 'bg-cyan-950/90 text-cyan-300 border-cyan-800/80',
+          desc: 'High-bitrate Prime streaming or store rental',
+          btnText: 'Watch on Prime Video ↗',
+          btnClass: 'bg-cyan-600 hover:bg-cyan-500 text-white',
+          url: `https://www.primevideo.com/search/ref=atv_nb_sr?phrase=${encodedTitle}`,
+          icon: '🔵'
+        });
+      }
+
+      // 4. Disney+ Hotstar / JioHotstar
+      if (platformStr.includes('hotstar') || platformStr.includes('disney')) {
+        providers.push({
+          name: 'Disney+ Hotstar',
+          badge: 'Super / Premium',
+          badgeClass: 'bg-blue-950/90 text-blue-300 border-blue-800/80',
+          desc: 'Official partner stream in 4K & multi-audio',
+          btnText: 'Watch on Hotstar ↗',
+          btnClass: 'bg-blue-600 hover:bg-blue-500 text-white',
+          url: `https://www.hotstar.com/in/explore?search_query=${encodedTitle}`,
+          icon: '⭐'
+        });
+      }
+
+      // 5. Apple TV+
+      if (platformStr.includes('apple')) {
+        providers.push({
+          name: 'Apple TV+',
+          badge: 'Apple TV Channel / Store',
+          badgeClass: 'bg-zinc-800 text-zinc-300 border-zinc-700',
+          desc: 'Pristine 4K Dolby Vision bitrate playback',
+          btnText: 'Stream on Apple TV+ ↗',
+          btnClass: 'bg-zinc-200 hover:bg-white text-black',
+          url: `https://tv.apple.com/search?term=${encodedTitle}`,
+          icon: '🍏'
+        });
+      }
+
+      // 6. SonyLIV
+      if (platformStr.includes('sony') || platformStr.includes('sonyliv')) {
+        providers.push({
+          name: 'SonyLIV',
+          badge: 'LIV Premium',
+          badgeClass: 'bg-purple-950/90 text-purple-300 border-purple-800/80',
+          desc: 'Sony Pictures India licensed release',
+          btnText: 'Watch on SonyLIV ↗',
+          btnClass: 'bg-purple-600 hover:bg-purple-500 text-white',
+          url: `https://www.sonyliv.com/search/${encodedTitle}`,
+          icon: '🟪'
+        });
+      }
+
+      // 7. ZEE5
+      if (platformStr.includes('zee') || platformStr.includes('zee5')) {
+        providers.push({
+          name: 'ZEE5',
+          badge: 'ZEE5 Premium / Free',
+          badgeClass: 'bg-amber-950/90 text-amber-300 border-amber-800/80',
+          desc: 'Licensed regional & Hindi catalog',
+          btnText: 'Watch on ZEE5 ↗',
+          btnClass: 'bg-amber-600 hover:bg-amber-500 text-white',
+          url: `https://www.zee5.com/search?q=${encodedTitle}`,
+          icon: '🟠'
+        });
+      }
+
+      // Fallback if no specific brand matched from platform string
+      if (providers.length === 0) {
+        providers.push({
+          name: movie.platform || 'Authorized Streaming Provider',
+          badge: 'Licensed Platform',
+          badgeClass: 'bg-emerald-950/90 text-emerald-300 border-emerald-800/80',
+          desc: `Curated availability: ${movie.platform || 'Online Streaming'}`,
+          btnText: 'Search Provider ↗',
+          btnClass: 'bg-emerald-600 hover:bg-emerald-500 text-white',
+          url: `https://www.google.com/search?q=${encodeURIComponent('where to stream ' + title + ' legally')}`,
+          icon: '🎬'
+        });
+      }
+
+      // Always include Official Digital Buy/Rent Store: YouTube Movies & Google TV
+      providers.push({
+        name: 'YouTube Movies & Google TV',
+        badge: 'Official Digital Store',
+        badgeClass: 'bg-red-950/90 text-red-300 border-red-800/80',
+        desc: 'Rent or buy official licensed digital copy in HD/4K',
+        btnText: 'Rent or Buy on YouTube ↗',
+        btnClass: 'bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700',
+        url: `https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' official full movie')}`,
+        icon: '▶️'
+      });
+
+      // Always include Global Verification Directory: JustWatch
+      providers.push({
+        name: 'JustWatch Streaming Guide',
+        badge: '100% Legal Aggregator',
+        badgeClass: 'bg-yellow-950/90 text-yellow-300 border-yellow-800/80',
+        desc: 'Compare all verified legal streaming options & prices',
+        btnText: 'Check JustWatch Index ↗',
+        btnClass: 'bg-zinc-800 hover:bg-zinc-700 text-amber-300 border border-amber-500/40',
+        url: `https://www.justwatch.com/in/search?q=${encodedTitle}`,
+        icon: '🔍'
+      });
+
+      // Render cards
+      providers.forEach(p => {
+        const card = document.createElement('div');
+        card.className = "p-3 rounded-xl bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 flex flex-col justify-between gap-2.5 transition-colors";
+        card.innerHTML = `
+          <div class="space-y-1">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5 font-bold text-white text-xs sm:text-sm truncate">
+                <span>${p.icon}</span>
+                <span class="truncate">${p.name}</span>
+              </div>
+              <span class="text-[9px] font-mono px-2 py-0.5 rounded border ${p.badgeClass} shrink-0">
+                ${p.badge}
+              </span>
+            </div>
+            <p class="text-[11px] text-zinc-400 line-clamp-1">${p.desc}</p>
+          </div>
+          <a href="${p.url}" target="_blank" rel="noopener noreferrer" 
+             onclick="handleStreamingPlatformClick('${p.name}')"
+             class="w-full py-2 px-3 rounded-lg ${p.btnClass} font-bold text-xs flex items-center justify-center gap-1.5 shadow transition-transform active:scale-95 cursor-pointer">
+            <span>${p.btnText}</span>
+          </a>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function handleStreamingPlatformClick(providerName) {
+      if (currentStreamingMovie) {
+        showToast(`Launching verified stream for "${currentStreamingMovie.title}" on ${providerName} 🎬`);
+      }
+      playChime(783.99, 0.1);
+    }
+
+    function streamInHeroBackground() {
+      if (!currentStreamingMovie) return;
+      const id = currentStreamingMovie.id;
+      closeStreamingModal();
+      setFeaturedMovie(id);
+      switchView('spotlight');
+      playHeroTrailerDirectly();
+      showToast(`Streaming "${currentStreamingMovie.title}" in featuring background! 🎬`);
+    }
+
+    function markCurrentStreamWatched() {
+      if (!currentStreamingMovie) return;
+      markMovieWatched(currentStreamingMovie.id);
+      closeStreamingModal();
+    }
+
+    function addCurrentStreamToWatchlist(event) {
+      if (!currentStreamingMovie) return;
+      addFeaturedToWatchlist(event, currentStreamingMovie.id);
+    }
+
+    // Compatibility aliases
+    function playTrailerInModal(id) {
+      openStreamingModal(id);
     }
 
     function closeTrailerModal() {
-      const modal = document.getElementById('trailer-modal');
-      modal.classList.add('opacity-0', 'pointer-events-none');
-      document.getElementById('trailer-iframe').src = "";
+      closeStreamingModal();
     }
 
     function openDetailModal(id) {
@@ -2706,7 +3037,6 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       document.getElementById('m-runtime').innerText = match.runtime;
       document.getElementById('m-platform').innerText = match.platform;
       document.getElementById('m-synopsis').innerText = match.synopsis;
-
 
       const expiryBox = document.getElementById('m-expiry-box');
       if (match.tag && match.tag.includes('Leaves')) {
@@ -2727,7 +3057,7 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
 
       document.getElementById('btn-modal-trailer').onclick = () => {
         closeDetailModal();
-        playTrailerInModal(match.id);
+        openStreamingModal(match.id);
       };
 
       document.getElementById('btn-modal-watch').onclick = () => {
@@ -2760,7 +3090,14 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
         switchView('spotlight');
       };
 
-      document.getElementById('btn-modal-trailer').classList.add('hidden');
+      const vStreamBtn = document.getElementById('btn-modal-trailer');
+      if (vStreamBtn) {
+        vStreamBtn.classList.remove('hidden');
+        vStreamBtn.onclick = () => {
+          closeDetailModal();
+          openStreamingModal(item.id || item);
+        };
+      }
       document.getElementById('btn-modal-watch').onclick = () => {
         closeDetailModal();
         showToast(`Already in Watched Vault!`);
@@ -2773,7 +3110,6 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
     function closeDetailModal() {
       const modal = document.getElementById('detail-modal');
       modal.classList.add('opacity-0', 'pointer-events-none');
-      document.getElementById('btn-modal-trailer').classList.remove('hidden');
     }
 
     function triggerShuffleWithSound() {
@@ -2858,6 +3194,36 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
         toast.classList.add('translate-y-20', 'opacity-0');
       }, 2500);
     }
+
+    // Modal dismiss listeners
+    document.addEventListener('click', (e) => {
+      const streamModal = document.getElementById('streaming-modal');
+      if (streamModal && e.target === streamModal) {
+        closeStreamingModal();
+      }
+      const detailModal = document.getElementById('detail-modal');
+      if (detailModal && e.target === detailModal) {
+        closeDetailModal();
+      }
+      const shuffleModal = document.getElementById('shuffle-modal');
+      if (shuffleModal && e.target === shuffleModal) {
+        shuffleModal.classList.add('opacity-0', 'pointer-events-none');
+      }
+      const cloudModal = document.getElementById('cloud-modal');
+      if (cloudModal && e.target === cloudModal) {
+        closeCloudConfigModal();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeStreamingModal();
+        closeDetailModal();
+        closeCloudConfigModal();
+        const shuffleModal = document.getElementById('shuffle-modal');
+        if (shuffleModal) shuffleModal.classList.add('opacity-0', 'pointer-events-none');
+      }
+    });
   </script>
 </body>
 </html>
