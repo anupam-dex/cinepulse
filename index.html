@@ -188,31 +188,22 @@
                alt="Hero Backdrop" class="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.7] scale-105 transition-all duration-700 pointer-events-none">
 
           <!-- Autoplay Video Player Wrapper (Placed above poster, seamlessly streams in background) -->
-          <div id="hero-player-wrap" class="absolute inset-0 overflow-hidden flex items-center justify-center pointer-events-none transition-opacity duration-700 opacity-90">
+          <div id="hero-player-wrap" class="absolute inset-0 overflow-hidden flex items-center justify-center transition-opacity duration-700 opacity-90 z-[2]">
             <iframe id="feat-trailer-player" 
-                    src="https://www.youtube-nocookie.com/embed/gzea5Na24B8?autoplay=1&mute=1&controls=0&loop=1&playlist=gzea5Na24B8&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0" 
+                    src="https://www.youtube.com/embed/gzeaGcLLl_A?autoplay=1&mute=1&controls=0&loop=1&playlist=gzeaGcLLl_A&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0" 
                     title="Featured Movie Trailer"
-                    class="w-[135%] h-[135%] min-w-[100vw] min-h-[56.25vw] object-cover pointer-events-none border-0" 
-                    allow="autoplay; encrypted-media; picture-in-picture" 
+                    class="w-[135%] h-[135%] min-w-[100vw] min-h-[56.25vw] object-cover border-0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                     tabindex="-1">
             </iframe>
           </div>
 
-          <!-- Cinematic Vignettes & Gradients -->
-          <div class="absolute inset-0 bg-gradient-to-t from-[#13151b] via-[#13151b]/70 to-transparent pointer-events-none z-10"></div>
-          <div class="absolute inset-0 bg-gradient-to-r from-[#13151b] via-[#13151b]/80 to-transparent pointer-events-none z-10"></div>
+          <!-- Cinematic Vignettes & Gradients (Shields iframe interactions while keeping video visible) -->
+          <div class="absolute inset-0 bg-gradient-to-t from-[#13151b] via-[#13151b]/40 to-transparent pointer-events-none z-10"></div>
+          <div class="absolute inset-0 bg-gradient-to-r from-[#13151b] via-[#13151b]/60 to-transparent pointer-events-none z-10"></div>
 
           <!-- Top-Right Autoplay Trailer Controls -->
           <div class="absolute top-4 right-4 z-30 flex items-center gap-2">
-            <button id="btn-hero-play-trigger" onclick="forcePlayHeroTrailer()" class="hidden px-3 py-1 rounded-full bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg transition-transform active:scale-95 animate-pulse cursor-pointer">
-              <span>▶</span> Click to Start Video
-            </button>
-
-            <div class="px-2.5 py-1 rounded-full bg-black/80 backdrop-blur border border-red-500/50 text-[10px] font-bold text-red-400 flex items-center gap-1.5 shadow-lg">
-              <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-              <span id="trailer-status-badge">AUTOPLAYING TEASER</span>
-            </div>
-
             <!-- Minimalist White Line-Drawn Speaker / Mute Toggle Button -->
             <button id="btn-hero-audio" onclick="toggleHeroAudio()" title="Toggle Trailer Audio" aria-label="Toggle Trailer Audio" 
                     class="w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur border border-white/30 hover:border-white/70 flex items-center justify-center text-white transition-all shadow-lg active:scale-90 cursor-pointer">
@@ -446,7 +437,7 @@
           <h5 class="text-xs font-bold text-zinc-200 uppercase tracking-wider">DMCA & Takedown Requests</h5>
           <p>
             If you are a copyright owner or authorized representative and believe any index reference infringes your copyright, please submit an inquiry to 
-            <a href="mailto:mcanupamdev@gmail.com?subject=CinePulse%20Copyright%20Inquiry" class="text-red-400 underline hover:text-red-300">mcanupamdev@gmail.com</a> for prompt removal.
+            <a href="mailto:hello.festivegroups@gmail.com?subject=CinePulse%20Copyright%20Inquiry" class="text-red-400 underline hover:text-red-300">hello.festivegroups@gmail.com</a> for prompt removal.
           </p>
         </div>
       </div>
@@ -1010,8 +1001,8 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
         genre: "Comedy, Horror",
         imdb: "7.6",
         rt: "83%",
-        youtubeId: "gzea5Na24B8",
-        trailer_url: "https://www.youtube.com/watch?v=gzea5Na24B8",
+        youtubeId: "gzeaGcLLl_A",
+        trailer_url: "https://www.youtube.com/watch?v=gzeaGcLLl_A",
         poster: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&auto=format&fit=crop&q=80",
         synopsis: "In Chanderi, an angry spirit abducts men at night during an annual festival. A gifted tailor and his friends solve the haunting.",
         hindiNotes: "Superb small-town North Indian dialect. Pankaj Tripathi and Rajkummar Rao articulate witty phrasing clearly.",
@@ -1222,9 +1213,16 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
     function getMovieIndex() {
       try {
         const stored = localStorage.getItem('cinepulse_movie_index');
+        let index = Object.assign({}, MASTER_SEED_INDEX);
         if (stored) {
-          return Object.assign({}, MASTER_SEED_INDEX, JSON.parse(stored));
+          index = Object.assign(index, JSON.parse(stored));
         }
+        if (index['tt7134096'] && index['tt7134096'].youtubeId === 'gzea5Na24B8') {
+          index['tt7134096'].youtubeId = 'gzeaGcLLl_A';
+          index['tt7134096'].trailer_url = 'https://www.youtube.com/watch?v=gzeaGcLLl_A';
+          saveMovieIndex(index);
+        }
+        return index;
       } catch (e) {
         console.warn("Could not read movie index from localStorage", e);
       }
@@ -1256,7 +1254,7 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
         {
           id: "u-anupam",
           name: "Anupam Dev",
-          email: "mcanupamdev@gmail.com",
+          email: "hello.festivegroups@gmail.com",
           avatar: "🍿",
           vibe: "Colloquial Hindi & Indie Realism",
           createdAt: "2026-09-01",
@@ -1596,7 +1594,7 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
 
         const imdbId = d.external_ids && d.external_ids.imdb_id ? d.external_ids.imdb_id : `tt${tmdbId}`;
         const trailerObj = (d.videos && d.videos.results) ? d.videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube') || d.videos.results[0] : null;
-        const youtubeId = trailerObj ? trailerObj.key : "gzea5Na24B8";
+        const youtubeId = trailerObj ? trailerObj.key : "gzeaGcLLl_A";
 
         const posterUrl = d.poster_path ? `https://image.tmdb.org/t/p/w500${d.poster_path}` : "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&auto=format&fit=crop&q=80";
 
@@ -1743,7 +1741,7 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
     let heroPlayer = null;
     let isHeroPlayerReady = false;
     let isHeroMuted = true;
-    let currentHeroYoutubeId = "gzea5Na24B8";
+    let currentHeroYoutubeId = "gzeaGcLLl_A";
 
     window.onYouTubeIframeAPIReady = function() {
       initHeroPlayer(currentHeroYoutubeId);
@@ -1758,7 +1756,7 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       const iframe = document.getElementById('feat-trailer-player');
       if (!iframe) return;
 
-      const expectedSrc = `https://www.youtube-nocookie.com/embed/${cleanId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${cleanId}&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0`;
+      const expectedSrc = `https://www.youtube.com/embed/${cleanId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${cleanId}&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0`;
 
       if (!iframe.src || !iframe.src.includes(cleanId)) {
         iframe.src = expectedSrc;
@@ -1782,16 +1780,7 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
                   updateHeroAudioButtonUI();
                 },
                 onStateChange: (e) => {
-                  if (e.data === YT.PlayerState.PLAYING) {
-                    const badge = document.getElementById('trailer-status-badge');
-                    if (badge) {
-                      badge.innerText = "STREAMING TRAILER";
-                      badge.classList.remove('text-amber-400');
-                      badge.classList.add('text-red-400');
-                    }
-                    const triggerBtn = document.getElementById('btn-hero-play-trigger');
-                    if (triggerBtn) triggerBtn.classList.add('hidden');
-                  } else if (e.data === YT.PlayerState.ENDED) {
+                  if (e.data === YT.PlayerState.ENDED) {
                     e.target.playVideo();
                   }
                 }
@@ -1819,10 +1808,8 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
 
       const iframe = document.getElementById('feat-trailer-player');
       const wrap = document.getElementById('hero-player-wrap');
-      const badge = document.getElementById('trailer-status-badge');
-      const triggerBtn = document.getElementById('btn-hero-play-trigger');
 
-      const expectedSrc = `https://www.youtube-nocookie.com/embed/${cleanId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${cleanId}&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0`;
+      const expectedSrc = `https://www.youtube.com/embed/${cleanId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${cleanId}&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0`;
 
       if (iframe) {
         if (!iframe.src || !iframe.src.includes(cleanId)) {
@@ -1833,14 +1820,6 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       if (wrap) {
         wrap.classList.remove('opacity-0');
         wrap.classList.add('opacity-90');
-      }
-      if (badge) {
-        badge.innerText = "STREAMING TRAILER";
-        badge.classList.remove('text-amber-400');
-        badge.classList.add('text-red-400');
-      }
-      if (triggerBtn) {
-        triggerBtn.classList.add('hidden');
       }
 
       if (heroPlayer && isHeroPlayerReady && typeof heroPlayer.loadVideoById === 'function') {
@@ -1992,7 +1971,7 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
         tagColor: "bg-nred",
         imdb: "7.6",
         rt: "83%",
-        youtubeId: "gzea5Na24B8",
+        youtubeId: "gzeaGcLLl_A",
         poster: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&auto=format&fit=crop&q=80",
         synopsis: "In Chanderi, an angry spirit abducts men at night during an annual four-day festival. A gifted tailor and his friends solve the haunting.",
         hindiNotes: "Superb small-town North Indian dialect. Pankaj Tripathi and Rajkummar Rao articulate witty phrasing clearly.",
@@ -2140,6 +2119,9 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       // Look in SCHEDULE_ITEMS or in MOVIE_DATABASE_INDEX
       let movie = SCHEDULE_ITEMS.find(m => m.id === id) || MOVIE_DATABASE_INDEX[id] || SCHEDULE_ITEMS[0];
       if (!movie) return;
+      if (movie.youtubeId === 'gzea5Na24B8') {
+        movie.youtubeId = 'gzeaGcLLl_A';
+      }
 
       currentFeaturedId = movie.id;
       document.getElementById('feat-title').innerText = `${movie.title} (${movie.year})`;
