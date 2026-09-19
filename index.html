@@ -1112,7 +1112,7 @@
     <div class="fixed -bottom-40 -right-40 w-96 h-96 bg-red-600/15 rounded-full blur-3xl pointer-events-none"></div>
     <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none"></div>
 
-    <div class="relative w-full max-w-4xl bg-zinc-950/90 border border-zinc-800/80 rounded-3xl shadow-2xl p-5 sm:p-8 backdrop-blur-xl text-zinc-200 my-auto">
+    <div class="relative w-full max-w-5xl bg-zinc-950/90 border border-zinc-800/80 rounded-3xl shadow-2xl p-5 sm:p-7 backdrop-blur-xl text-zinc-200 my-auto">
       
       <!-- VIEW 1: MOOD SELECTION GRID -->
       <div id="mood-select-view" class="space-y-6">
@@ -1139,101 +1139,125 @@
         </div>
 
         <!-- 6 Interactive Mood Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-3.5">
           
           <!-- Card 1: Mind-Bending -->
-          <div onclick="selectDailyMood('mind-bending')" class="bg-gradient-to-br from-indigo-950/30 via-zinc-900/70 to-zinc-900/90 hover:from-indigo-900/40 hover:to-zinc-800 border border-zinc-800 hover:border-indigo-400/80 rounded-2xl p-4 text-left transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-950/40 cursor-pointer group relative overflow-hidden flex flex-col justify-between">
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">🌌</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Mind-Bending</span>
-              </div>
-              <h4 class="text-base font-black text-white group-hover:text-indigo-200 transition-colors">Mind-Bending & Deep</h4>
-              <p class="text-xs text-zinc-400 leading-relaxed">Cerebral paradoxes, layered realities, existential quests & psychological wonder.</p>
+          <div onclick="selectDailyMood('mind-bending')" class="group relative rounded-2xl overflow-hidden border border-zinc-800 hover:border-indigo-400/90 bg-zinc-900/90 hover:-translate-y-1.5 transition-all duration-300 shadow-lg hover:shadow-indigo-950/60 cursor-pointer flex flex-col">
+            <div class="relative h-36 sm:h-44 w-full overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=600&q=80" alt="Mind-Bending Cinema" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 brightness-75 group-hover:brightness-95" loading="lazy" />
+              <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent"></div>
+              <span class="absolute top-2 left-2 text-lg drop-shadow-md">🌌</span>
+              <span class="absolute top-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/80 text-white backdrop-blur-md">Sci-Fi</span>
             </div>
-            <div class="pt-3 mt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500">
-              <span>e.g. Inception • Interstellar</span>
-              <span class="text-indigo-400 font-bold group-hover:translate-x-0.5 transition-transform">Tune In →</span>
+            <div class="p-3 bg-zinc-950/90 flex-1 flex flex-col justify-between">
+              <div>
+                <h4 class="text-sm font-black text-white group-hover:text-indigo-300 transition-colors">Mind-Bending</h4>
+                <p class="text-[11px] text-zinc-400 font-medium">Cosmic & Cerebral</p>
+              </div>
+              <div class="mt-2.5 pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[10px] text-indigo-400 font-bold">
+                <span>Tune In</span>
+                <span class="group-hover:translate-x-1 transition-transform">→</span>
+              </div>
             </div>
           </div>
 
           <!-- Card 2: Feel-Good -->
-          <div onclick="selectDailyMood('feel-good')" class="bg-gradient-to-br from-emerald-950/30 via-zinc-900/70 to-zinc-900/90 hover:from-emerald-900/40 hover:to-zinc-800 border border-zinc-800 hover:border-emerald-400/80 rounded-2xl p-4 text-left transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-950/40 cursor-pointer group relative overflow-hidden flex flex-col justify-between">
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">🛋️</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Cozy Vibe</span>
-              </div>
-              <h4 class="text-base font-black text-white group-hover:text-emerald-200 transition-colors">Cozy & Feel-Good</h4>
-              <p class="text-xs text-zinc-400 leading-relaxed">Gentle humor, comforting nostalgia, heartwarming reunions & soul-lifting warmth.</p>
+          <div onclick="selectDailyMood('feel-good')" class="group relative rounded-2xl overflow-hidden border border-zinc-800 hover:border-emerald-400/90 bg-zinc-900/90 hover:-translate-y-1.5 transition-all duration-300 shadow-lg hover:shadow-emerald-950/60 cursor-pointer flex flex-col">
+            <div class="relative h-36 sm:h-44 w-full overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=600&q=80" alt="Feel-Good Cinema" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 brightness-75 group-hover:brightness-95" loading="lazy" />
+              <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent"></div>
+              <span class="absolute top-2 left-2 text-lg drop-shadow-md">🛋️</span>
+              <span class="absolute top-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/80 text-white backdrop-blur-md">Warmth</span>
             </div>
-            <div class="pt-3 mt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500">
-              <span>e.g. Laapataa Ladies • Shawshank</span>
-              <span class="text-emerald-400 font-bold group-hover:translate-x-0.5 transition-transform">Tune In →</span>
+            <div class="p-3 bg-zinc-950/90 flex-1 flex flex-col justify-between">
+              <div>
+                <h4 class="text-sm font-black text-white group-hover:text-emerald-300 transition-colors">Feel-Good</h4>
+                <p class="text-[11px] text-zinc-400 font-medium">Cozy & Uplifting</p>
+              </div>
+              <div class="mt-2.5 pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[10px] text-emerald-400 font-bold">
+                <span>Tune In</span>
+                <span class="group-hover:translate-x-1 transition-transform">→</span>
+              </div>
             </div>
           </div>
 
           <!-- Card 3: Adrenaline -->
-          <div onclick="selectDailyMood('adrenaline')" class="bg-gradient-to-br from-amber-950/30 via-zinc-900/70 to-zinc-900/90 hover:from-amber-900/40 hover:to-zinc-800 border border-zinc-800 hover:border-amber-400/80 rounded-2xl p-4 text-left transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-950/40 cursor-pointer group relative overflow-hidden flex flex-col justify-between">
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">🍿</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Adrenaline</span>
-              </div>
-              <h4 class="text-base font-black text-white group-hover:text-amber-200 transition-colors">High-Octane Adrenaline</h4>
-              <p class="text-xs text-zinc-400 leading-relaxed">Relentless momentum, daring treasure hunts, explosive shootouts & kinetic fury.</p>
+          <div onclick="selectDailyMood('adrenaline')" class="group relative rounded-2xl overflow-hidden border border-zinc-800 hover:border-amber-400/90 bg-zinc-900/90 hover:-translate-y-1.5 transition-all duration-300 shadow-lg hover:shadow-amber-950/60 cursor-pointer flex flex-col">
+            <div class="relative h-36 sm:h-44 w-full overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1533488765986-dfa2a9939acd?auto=format&fit=crop&w=600&q=80" alt="Adrenaline Action Cinema" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 brightness-75 group-hover:brightness-95" loading="lazy" />
+              <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent"></div>
+              <span class="absolute top-2 left-2 text-lg drop-shadow-md">🍿</span>
+              <span class="absolute top-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/80 text-white backdrop-blur-md">Action</span>
             </div>
-            <div class="pt-3 mt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500">
-              <span>e.g. Mad Max • Wasseypur • Uncharted</span>
-              <span class="text-amber-400 font-bold group-hover:translate-x-0.5 transition-transform">Tune In →</span>
+            <div class="p-3 bg-zinc-950/90 flex-1 flex flex-col justify-between">
+              <div>
+                <h4 class="text-sm font-black text-white group-hover:text-amber-300 transition-colors">Adrenaline</h4>
+                <p class="text-[11px] text-zinc-400 font-medium">Kinetic & High-Octane</p>
+              </div>
+              <div class="mt-2.5 pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[10px] text-amber-400 font-bold">
+                <span>Tune In</span>
+                <span class="group-hover:translate-x-1 transition-transform">→</span>
+              </div>
             </div>
           </div>
 
           <!-- Card 4: Dark & Gritty -->
-          <div onclick="selectDailyMood('dark-gritty')" class="bg-gradient-to-br from-rose-950/30 via-zinc-900/70 to-zinc-900/90 hover:from-rose-900/40 hover:to-zinc-800 border border-zinc-800 hover:border-rose-400/80 rounded-2xl p-4 text-left transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-950/40 cursor-pointer group relative overflow-hidden flex flex-col justify-between">
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">🕯️</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">Gritty Noir</span>
-              </div>
-              <h4 class="text-base font-black text-white group-hover:text-rose-200 transition-colors">Dark, Gritty & Intense</h4>
-              <p class="text-xs text-zinc-400 leading-relaxed">Moral labyrinths, simmering vengeance, rain-soaked alleys & intense crime.</p>
+          <div onclick="selectDailyMood('dark-gritty')" class="group relative rounded-2xl overflow-hidden border border-zinc-800 hover:border-rose-400/90 bg-zinc-900/90 hover:-translate-y-1.5 transition-all duration-300 shadow-lg hover:shadow-rose-950/60 cursor-pointer flex flex-col">
+            <div class="relative h-36 sm:h-44 w-full overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80" alt="Dark & Gritty Crime Cinema" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 brightness-75 group-hover:brightness-95" loading="lazy" />
+              <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent"></div>
+              <span class="absolute top-2 left-2 text-lg drop-shadow-md">🕯️</span>
+              <span class="absolute top-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-500/80 text-white backdrop-blur-md">Noir</span>
             </div>
-            <div class="pt-3 mt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500">
-              <span>e.g. Wasseypur 2 • Parasite • Udaan</span>
-              <span class="text-rose-400 font-bold group-hover:translate-x-0.5 transition-transform">Tune In →</span>
+            <div class="p-3 bg-zinc-950/90 flex-1 flex flex-col justify-between">
+              <div>
+                <h4 class="text-sm font-black text-white group-hover:text-rose-300 transition-colors">Dark & Gritty</h4>
+                <p class="text-[11px] text-zinc-400 font-medium">Crime & Retribution</p>
+              </div>
+              <div class="mt-2.5 pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[10px] text-rose-400 font-bold">
+                <span>Tune In</span>
+                <span class="group-hover:translate-x-1 transition-transform">→</span>
+              </div>
             </div>
           </div>
 
           <!-- Card 5: Soulful -->
-          <div onclick="selectDailyMood('soulful')" class="bg-gradient-to-br from-sky-950/30 via-zinc-900/70 to-zinc-900/90 hover:from-sky-900/40 hover:to-zinc-800 border border-zinc-800 hover:border-sky-400/80 rounded-2xl p-4 text-left transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-sky-950/40 cursor-pointer group relative overflow-hidden flex flex-col justify-between">
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">🌙</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">Soulful</span>
-              </div>
-              <h4 class="text-base font-black text-white group-hover:text-sky-200 transition-colors">Soulful & Inspiring</h4>
-              <p class="text-xs text-zinc-400 leading-relaxed">Tearful triumphs, honest human grit, poetic romance & stories that linger forever.</p>
+          <div onclick="selectDailyMood('soulful')" class="group relative rounded-2xl overflow-hidden border border-zinc-800 hover:border-sky-400/90 bg-zinc-900/90 hover:-translate-y-1.5 transition-all duration-300 shadow-lg hover:shadow-sky-950/60 cursor-pointer flex flex-col">
+            <div class="relative h-36 sm:h-44 w-full overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80" alt="Soulful Inspiring Cinema" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 brightness-75 group-hover:brightness-95" loading="lazy" />
+              <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent"></div>
+              <span class="absolute top-2 left-2 text-lg drop-shadow-md">🌙</span>
+              <span class="absolute top-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-500/80 text-white backdrop-blur-md">Drama</span>
             </div>
-            <div class="pt-3 mt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500">
-              <span>e.g. 12th Fail • Aadujeevitham • Anora</span>
-              <span class="text-sky-400 font-bold group-hover:translate-x-0.5 transition-transform">Tune In →</span>
+            <div class="p-3 bg-zinc-950/90 flex-1 flex flex-col justify-between">
+              <div>
+                <h4 class="text-sm font-black text-white group-hover:text-sky-300 transition-colors">Soulful</h4>
+                <p class="text-[11px] text-zinc-400 font-medium">Inspiring & Deep Grit</p>
+              </div>
+              <div class="mt-2.5 pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[10px] text-sky-400 font-bold">
+                <span>Tune In</span>
+                <span class="group-hover:translate-x-1 transition-transform">→</span>
+              </div>
             </div>
           </div>
 
-          <!-- Card 6: Spooky & Supernatural -->
-          <div onclick="selectDailyMood('spooky-thrills')" class="bg-gradient-to-br from-purple-950/30 via-zinc-900/70 to-zinc-900/90 hover:from-purple-900/40 hover:to-zinc-800 border border-zinc-800 hover:border-purple-400/80 rounded-2xl p-4 text-left transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-950/40 cursor-pointer group relative overflow-hidden flex flex-col justify-between">
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">⚡</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">Spooky Mystery</span>
-              </div>
-              <h4 class="text-base font-black text-white group-hover:text-purple-200 transition-colors">Late-Night Spooks & Mystery</h4>
-              <p class="text-xs text-zinc-400 leading-relaxed">Ancient curses, shadowy village folklore, eerie legends & spine-tingling thrill.</p>
+          <!-- Card 6: Spooky -->
+          <div onclick="selectDailyMood('spooky-thrills')" class="group relative rounded-2xl overflow-hidden border border-zinc-800 hover:border-purple-400/90 bg-zinc-900/90 hover:-translate-y-1.5 transition-all duration-300 shadow-lg hover:shadow-purple-950/60 cursor-pointer flex flex-col">
+            <div class="relative h-36 sm:h-44 w-full overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80" alt="Spooky Mystery Folklore Cinema" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 brightness-75 group-hover:brightness-95" loading="lazy" />
+              <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent"></div>
+              <span class="absolute top-2 left-2 text-lg drop-shadow-md">⚡</span>
+              <span class="absolute top-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-500/80 text-white backdrop-blur-md">Mystery</span>
             </div>
-            <div class="pt-3 mt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500">
-              <span>e.g. Tumbbad • Stree • Parasite</span>
-              <span class="text-purple-400 font-bold group-hover:translate-x-0.5 transition-transform">Tune In →</span>
+            <div class="p-3 bg-zinc-950/90 flex-1 flex flex-col justify-between">
+              <div>
+                <h4 class="text-sm font-black text-white group-hover:text-purple-300 transition-colors">Spooky</h4>
+                <p class="text-[11px] text-zinc-400 font-medium">Folklore & Chills</p>
+              </div>
+              <div class="mt-2.5 pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[10px] text-purple-400 font-bold">
+                <span>Tune In</span>
+                <span class="group-hover:translate-x-1 transition-transform">→</span>
+              </div>
             </div>
           </div>
 
