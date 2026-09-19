@@ -2523,7 +2523,32 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
     let heroPlayer = null;
     let isHeroPlayerReady = false;
     let isHeroMuted = true;
+    let isHeroPausedForModal = false;
     let currentHeroYoutubeId = "gzeaGcLLl_A";
+
+    function pauseHeroTrailer() {
+      isHeroPausedForModal = true;
+      const iframe = document.getElementById('feat-trailer-player');
+      if (heroPlayer && isHeroPlayerReady) {
+        try {
+          heroPlayer.pauseVideo();
+        } catch(e) {}
+      } else if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
+      }
+    }
+
+    function resumeHeroTrailer() {
+      isHeroPausedForModal = false;
+      const iframe = document.getElementById('feat-trailer-player');
+      if (heroPlayer && isHeroPlayerReady) {
+        try {
+          heroPlayer.playVideo();
+        } catch(e) {}
+      } else if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+      }
+    }
 
     window.onYouTubeIframeAPIReady = function() {
       initHeroPlayer(currentHeroYoutubeId);
@@ -2774,8 +2799,9 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       }
     }, { once: true });
 
-    // Auto-resume background trailer watcher: guarantees video never stays paused or shows a pause symbol inside
+    // Auto-resume background trailer watcher: guarantees video never stays paused or shows a pause symbol inside when modal is not active
     setInterval(() => {
+      if (isHeroPausedForModal) return;
       if (heroPlayer && isHeroPlayerReady && typeof heroPlayer.getPlayerState === 'function') {
         try {
           if (heroPlayer.getPlayerState() === YT.PlayerState.PAUSED) {
@@ -3848,6 +3874,9 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       // Populate Legitimate Streaming Platforms
       renderStreamingPlatforms(movie);
 
+      // Pause background trailer so audio and video don't conflict with pop up trailer
+      pauseHeroTrailer();
+
       // Show Modal
       const modal = document.getElementById('streaming-modal');
       if (modal) {
@@ -3875,6 +3904,8 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       if (loader) {
         loader.classList.remove('opacity-0', 'pointer-events-none');
       }
+      // Resume background trailer when pop up modal is dismissed
+      resumeHeroTrailer();
     }
 
     function renderStreamingPlatforms(movie) {
