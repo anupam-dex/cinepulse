@@ -100,6 +100,12 @@
       animation: macCellPulse 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) 2;
       z-index: 25;
     }
+    #hero-player-wrap,
+    #feat-trailer-player {
+      pointer-events: none !important;
+      user-select: none !important;
+      -webkit-user-select: none !important;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#0a0b0e] text-zinc-100 selection:bg-red-600 selection:text-white" onclick="handleGlobalClick(event)">
@@ -253,16 +259,19 @@
           <img id="feat-backdrop" src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1400&auto=format&fit=crop&q=85" 
                alt="Hero Backdrop" class="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.7] scale-105 transition-all duration-700 pointer-events-none">
 
-          <!-- Autoplay Video Player Wrapper (Placed above poster, seamlessly streams in background) -->
-          <div id="hero-player-wrap" class="absolute inset-0 overflow-hidden flex items-center justify-center transition-opacity duration-700 opacity-90 z-[2]">
+          <!-- Autoplay Video Player Wrapper (Seamless background trailer with no pause symbols or controls) -->
+          <div id="hero-player-wrap" class="absolute inset-0 overflow-hidden flex items-center justify-center transition-opacity duration-700 opacity-90 z-[2] pointer-events-none select-none">
             <iframe id="feat-trailer-player" 
-                    src="https://www.youtube-nocookie.com/embed/gzeaGcLLl_A?autoplay=1&mute=1&controls=0&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0" 
+                    src="https://www.youtube-nocookie.com/embed/gzeaGcLLl_A?autoplay=1&mute=1&controls=0&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&loop=1&playlist=gzeaGcLLl_A&autohide=1&showinfo=0" 
                     title="Featured Movie Trailer"
-                    class="w-[135%] h-[135%] min-w-[100vw] min-h-[56.25vw] object-cover border-0" 
+                    class="w-[135%] h-[135%] min-w-[100vw] min-h-[56.25vw] object-cover border-0 pointer-events-none select-none" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                     tabindex="-1">
             </iframe>
           </div>
+
+          <!-- Transparent Interaction Shield: Absorbs all clicks & hovers, completely shielding background iframe from showing pause symbols -->
+          <div class="absolute inset-0 z-[4] pointer-events-auto cursor-default"></div>
 
           <!-- Cinematic Vignettes & Gradients (Shields iframe interactions while keeping video visible) -->
           <div class="absolute inset-0 bg-gradient-to-t from-[#13151b] via-[#13151b]/40 to-transparent pointer-events-none z-10"></div>
@@ -2454,7 +2463,7 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       const iframe = document.getElementById('feat-trailer-player');
       if (!iframe) return;
 
-      const expectedSrc = `https://www.youtube-nocookie.com/embed/${cleanId}?autoplay=1&mute=1&controls=0&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&origin=${encodeURIComponent(window.location.origin)}`;
+      const expectedSrc = `https://www.youtube-nocookie.com/embed/${cleanId}?autoplay=1&mute=1&controls=0&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&loop=1&playlist=${cleanId}&autohide=1&showinfo=0&origin=${encodeURIComponent(window.location.origin)}`;
 
       if (!iframe.src || !iframe.src.includes(cleanId)) {
         iframe.src = expectedSrc;
@@ -2491,6 +2500,9 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
                       bufferBadge.classList.remove('opacity-0');
                       if (bufferText) bufferText.innerText = "Buffering...";
                     }
+                  } else if (e.data === YT.PlayerState.PAUSED) {
+                    // Suppress any pause symbol from ever displaying inside the background trailer
+                    e.target.playVideo();
                   } else if (e.data === YT.PlayerState.ENDED) {
                     e.target.playVideo();
                   }
@@ -2558,7 +2570,7 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       }
 
       // Cold start fallback
-      const expectedSrc = `https://www.youtube-nocookie.com/embed/${cleanId}?autoplay=1&mute=1&controls=0&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&origin=${encodeURIComponent(window.location.origin)}`;
+      const expectedSrc = `https://www.youtube-nocookie.com/embed/${cleanId}?autoplay=1&mute=1&controls=0&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&loop=1&playlist=${cleanId}&autohide=1&showinfo=0&origin=${encodeURIComponent(window.location.origin)}`;
 
       if (iframe) {
         if (!iframe.src || !iframe.src.includes(cleanId)) {
@@ -2675,6 +2687,17 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
         } catch (e) {}
       }
     }, { once: true });
+
+    // Auto-resume background trailer watcher: guarantees video never stays paused or shows a pause symbol inside
+    setInterval(() => {
+      if (heroPlayer && isHeroPlayerReady && typeof heroPlayer.getPlayerState === 'function') {
+        try {
+          if (heroPlayer.getPlayerState() === YT.PlayerState.PAUSED) {
+            heroPlayer.playVideo();
+          }
+        } catch(e) {}
+      }
+    }, 1000);
 
     // ==========================================
     // 5. MASTER CALENDAR & WATCHED VAULT
