@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CinePulse — Today's Cinema & Watch Radar</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍿</text></svg>">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,8 +15,8 @@
   <link rel="dns-prefetch" href="https://i.ytimg.com">
   <link rel="dns-prefetch" href="https://googlevideo.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
-  <script src="https://www.youtube.com/iframe_api"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script async src="https://www.youtube.com/iframe_api"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -244,7 +245,7 @@
   </div>
 
   <!-- MAIN WORKSPACE -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+  <main class="flex-1 w-full max-w-[1720px] 2xl:max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-10 py-4 sm:py-6 space-y-8">
 
     <!-- VIEW 1: TONIGHT'S FEATURED MARQUEE -->
     <section id="view-spotlight" class="space-y-8">
@@ -253,7 +254,7 @@
       <div class="relative rounded-3xl overflow-hidden border border-zinc-800 bg-nsurface shadow-2xl">
         
         <!-- Backdrop Banner with Autoplay YouTube Trailer -->
-        <div class="relative h-[380px] sm:h-[460px] md:h-[520px] w-full overflow-hidden bg-black">
+        <div class="relative min-h-[460px] sm:min-h-[520px] md:min-h-[580px] lg:h-[70vh] max-h-[820px] w-full overflow-hidden bg-black">
           
           <!-- Fallback Poster Backdrop (Base Layer) -->
           <img id="feat-backdrop" src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1400&auto=format&fit=crop&q=85" 
@@ -264,7 +265,7 @@
             <iframe id="feat-trailer-player" 
                     src="https://www.youtube-nocookie.com/embed/gzeaGcLLl_A?autoplay=1&mute=1&controls=0&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&loop=1&playlist=gzeaGcLLl_A&autohide=1&showinfo=0" 
                     title="Featured Movie Trailer"
-                    class="w-[135%] h-[135%] min-w-[100vw] min-h-[56.25vw] object-cover border-0 pointer-events-none select-none" 
+                    class="w-[140%] h-[140%] min-w-[100vw] min-h-[56.25vw] object-cover border-0 pointer-events-none select-none scale-105" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                     tabindex="-1">
             </iframe>
@@ -696,12 +697,12 @@
 
   <!-- Legitimate Online Streaming & Watch Modal -->
   <div id="streaming-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/90 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-200 overflow-y-auto">
-    <div class="relative w-full max-w-4xl bg-zinc-950 rounded-2xl overflow-hidden shadow-2xl border border-zinc-800 text-zinc-200 my-auto flex flex-col max-h-[92vh]">
+    <div class="relative w-full max-w-5xl bg-zinc-950 rounded-3xl overflow-hidden shadow-2xl border border-zinc-800 text-zinc-200 my-auto flex flex-col max-h-[94vh]">
       
       <!-- Top Header Bar -->
-      <div class="p-4 bg-zinc-900/90 border-b border-zinc-800 flex items-center justify-between shrink-0">
+      <div class="p-4 sm:p-5 bg-zinc-900/90 border-b border-zinc-800 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3 overflow-hidden">
-          <div class="w-8 h-8 rounded-lg bg-red-600/20 border border-red-600/30 flex items-center justify-center text-red-500 font-bold text-sm shrink-0">
+          <div class="w-9 h-9 rounded-xl bg-red-600/20 border border-red-600/30 flex items-center justify-center text-red-500 font-bold text-sm shrink-0 shadow">
             ▶
           </div>
           <div class="truncate">
@@ -727,13 +728,43 @@
       </div>
 
       <!-- Scrollable Modal Body -->
-      <div class="overflow-y-auto p-4 sm:p-5 space-y-5 custom-scrollbar">
+      <div class="overflow-y-auto p-4 sm:p-6 space-y-5 custom-scrollbar">
         
         <!-- Embedded High-Definition Official Studio Stream / Trailer Player -->
         <div class="space-y-2">
-          <div class="relative aspect-video w-full bg-black rounded-xl overflow-hidden border border-zinc-800 shadow-xl">
+          <div class="relative aspect-video w-full bg-black rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl">
+            
+            <!-- Cinematic Loading Placeholder Cover (covers black box until video media buffers) -->
+            <div id="stream-modal-loader" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-950 transition-opacity duration-500 overflow-hidden">
+              <!-- Blurred Movie Backdrop Image behind loader -->
+              <img id="stream-modal-loader-bg" src="" alt="" class="absolute inset-0 w-full h-full object-cover filter blur-xl brightness-[0.25] scale-110 pointer-events-none">
+              <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-transparent pointer-events-none"></div>
+              
+              <!-- Loader Indicator Card -->
+              <div class="relative z-10 flex flex-col items-center text-center p-6 space-y-3 max-w-sm">
+                <!-- Dual-ring Spinning Radar Indicator -->
+                <div class="relative w-14 h-14 flex items-center justify-center">
+                  <div class="absolute inset-0 rounded-full border-2 border-red-500/20 border-t-red-500 animate-spin"></div>
+                  <div class="w-10 h-10 rounded-full border-2 border-amber-500/20 border-b-amber-400 animate-spin" style="animation-direction: reverse; animation-duration: 0.85s;"></div>
+                  <span class="text-lg">🍿</span>
+                </div>
+                
+                <div class="space-y-1">
+                  <h5 class="text-sm sm:text-base font-black text-white tracking-wide">Connecting to HD Studio Stream...</h5>
+                  <p id="stream-modal-loader-title" class="text-xs text-zinc-300 font-medium">Loading Title...</p>
+                </div>
+
+                <!-- Quality & Authorization Pill -->
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/60 border border-zinc-700/70 text-[10px] font-mono text-zinc-400">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                  <span>1080p HD Studio Stream • Official Licensed Media</span>
+                </div>
+              </div>
+            </div>
+
             <iframe id="stream-modal-iframe" 
                     src="" 
+                    onload="handleStreamModalIframeLoaded()"
                     class="w-full h-full border-0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                     allowfullscreen>
@@ -3712,6 +3743,20 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       if (movie.rt) parts.push(`🍅 ${movie.rt}`);
       if (metaEl) metaEl.innerText = parts.join(' • ') || "Featured Cinema";
 
+      // Activate cinematic loading placeholder cover with poster backdrop
+      const loader = document.getElementById('stream-modal-loader');
+      const loaderBg = document.getElementById('stream-modal-loader-bg');
+      const loaderTitle = document.getElementById('stream-modal-loader-title');
+      if (loader) {
+        loader.classList.remove('opacity-0', 'pointer-events-none');
+      }
+      if (loaderBg) {
+        loaderBg.src = movie.poster || `https://i.ytimg.com/vi/${cleanId}/hqdefault.jpg`;
+      }
+      if (loaderTitle) {
+        loaderTitle.innerText = `${movie.title} (${movie.year || 2024})`;
+      }
+
       // Populate Embedded Streaming Player
       const rawYt = movie.trailer_url || movie.trailerUrl || movie.youtubeId;
       const cleanId = extractYouTubeId(rawYt);
@@ -3729,6 +3774,9 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
         if (directLink) directLink.classList.add('hidden');
       }
 
+      // Safety fallback: ensure loader smoothly dissolves once video connects
+      setTimeout(handleStreamModalIframeLoaded, 1600);
+
       // Populate Legitimate Streaming Platforms
       renderStreamingPlatforms(movie);
 
@@ -3736,6 +3784,13 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       const modal = document.getElementById('streaming-modal');
       if (modal) {
         modal.classList.remove('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    function handleStreamModalIframeLoaded() {
+      const loader = document.getElementById('stream-modal-loader');
+      if (loader) {
+        loader.classList.add('opacity-0', 'pointer-events-none');
       }
     }
 
@@ -3747,6 +3802,10 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       const iframe = document.getElementById('stream-modal-iframe');
       if (iframe) {
         iframe.src = "";
+      }
+      const loader = document.getElementById('stream-modal-loader');
+      if (loader) {
+        loader.classList.remove('opacity-0', 'pointer-events-none');
       }
     }
 
