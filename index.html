@@ -208,6 +208,9 @@
             <button onclick="openSyncHubModal(); toggleProfileDropdown(event);" class="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-blue-900/50 to-indigo-900/50 hover:from-blue-800/60 hover:to-indigo-800/60 text-blue-200 border border-blue-700/50 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow cursor-pointer">
               <span>🔄</span> Sync External Watchlists
             </button>
+            <button id="dd-admin-cloud-btn" onclick="openCloudConfigModal(); toggleProfileDropdown(event);" class="w-full py-2 px-3 rounded-lg bg-emerald-950/70 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-600/50 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow cursor-pointer">
+              <span>☁️</span> Cloud DB & Admin Settings
+            </button>
             <button onclick="openAuthModal('create')" class="w-full py-2 px-3 rounded-lg bg-nred hover:bg-red-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow">
               <span>➕</span> Create New Profile
             </button>
@@ -228,11 +231,11 @@
         <span class="hidden sm:inline text-[11px] font-bold">Sync Watchlists</span>
       </button>
 
-      <!-- Cloud DB Status & Settings Button -->
-      <button onclick="openCloudConfigModal()" id="btn-cloud-status" title="Cloud Database & TMDB Settings" 
-              class="px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-nborder hover:border-emerald-500/50 text-xs font-semibold flex items-center gap-1.5 transition-all text-zinc-300">
+      <!-- Cloud DB Status & Settings Button (Visible to Admin only) -->
+      <button onclick="openCloudConfigModal()" id="btn-cloud-status" title="Cloud Database & TMDB Settings (Admin Only)" 
+              class="hidden px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-nborder hover:border-emerald-500/50 text-xs font-semibold flex items-center gap-1.5 transition-all text-zinc-300 cursor-pointer">
         <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-zinc-500"></span>
-        <span id="cloud-status-label" class="hidden md:inline text-[11px]">Cloud DB</span>
+        <span id="cloud-status-label" class="hidden md:inline text-[11px]">Cloud DB (Admin)</span>
       </button>
     </div>
   </header>
@@ -539,11 +542,16 @@
     <div class="relative w-full max-w-lg bg-nsurface rounded-3xl border border-nborder shadow-2xl p-6 space-y-5">
       <button onclick="closeCloudConfigModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white text-base font-bold">✕</button>
 
-      <div class="flex items-center gap-3 border-b border-nborder pb-3">
-        <span class="text-2xl">☁️</span>
-        <div>
-          <h3 class="text-base font-black text-white">Cloud Database & TMDB Sync</h3>
-          <p class="text-[11px] text-zinc-400">Sync movie indexes across all devices with free Supabase and TMDB.</p>
+      <div class="flex items-center justify-between border-b border-nborder pb-3">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">☁️</span>
+          <div>
+            <h3 class="text-base font-black text-white flex items-center gap-2">
+              <span>Cloud Database & TMDB Sync</span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold">ADMIN ONLY</span>
+            </h3>
+            <p class="text-[11px] text-zinc-400">Restricted configuration panel for database endpoints and API secrets.</p>
+          </div>
         </div>
       </div>
 
@@ -1482,6 +1490,7 @@
     // ==========================================
     // 0. CLOUD DATABASE (SUPABASE) & TMDB ENGINE
     // ==========================================
+    const ADMIN_EMAIL = "hello.festivegroups@gmail.com";
     let SUPABASE_URL = localStorage.getItem('cinepulse_supabase_url') || '';
     let SUPABASE_KEY = localStorage.getItem('cinepulse_supabase_key') || '';
     let TMDB_API_KEY = localStorage.getItem('cinepulse_tmdb_key') || '';
@@ -1604,7 +1613,15 @@
       }
     }
 
+    function isAdmin() {
+      return !!(currentUser && currentUser.email && currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+    }
+
     function openCloudConfigModal() {
+      if (!isAdmin()) {
+        showToast("🔒 Access Denied: Cloud DB Settings is restricted to Admin only.");
+        return;
+      }
       document.getElementById('input-supabase-url').value = SUPABASE_URL;
       document.getElementById('input-supabase-key').value = SUPABASE_KEY;
       document.getElementById('input-tmdb-key').value = TMDB_API_KEY;
@@ -1619,6 +1636,11 @@
     }
 
     async function saveCloudConfig() {
+      if (!isAdmin()) {
+        showToast("🔒 Access Denied: Only Admin can update Cloud DB settings.");
+        closeCloudConfigModal();
+        return;
+      }
       const url = document.getElementById('input-supabase-url').value.trim();
       const key = document.getElementById('input-supabase-key').value.trim();
       const tmdbKey = document.getElementById('input-tmdb-key').value.trim();
@@ -1981,11 +2003,32 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
           if (!index[k] || !index[k].youtubeId || index[k].youtubeId.length !== 11) {
             index[k] = MASTER_SEED_INDEX[k];
           } else if (MASTER_SEED_INDEX[k]) {
-            // Guarantee verified trailer URL & youtubeId
             index[k].youtubeId = MASTER_SEED_INDEX[k].youtubeId;
             index[k].trailer_url = MASTER_SEED_INDEX[k].trailer_url;
           }
         });
+
+        // Auto-heal any placeholder synopses using Open Movie Library
+        Object.keys(index).forEach(k => {
+          const item = index[k];
+          if (item && item.synopsis && item.synopsis.includes('Custom indexed title added to CinePulse catalog')) {
+            // Fetch authentic synopsis asynchronously
+            fetchOpenMovieMetadata(item.title).then(meta => {
+              if (meta && meta.synopsis) {
+                item.synopsis = meta.synopsis;
+                if (meta.poster && meta.poster.startsWith('http')) item.poster = meta.poster;
+                if (meta.genre) item.genre = meta.genre;
+                if (meta.imdb) item.imdb = meta.imdb;
+                saveMovieIndex(index);
+                const curFeatId = currentFeaturedId;
+                if (curFeatId === k) {
+                  setFeaturedMovie(k);
+                }
+              }
+            });
+          }
+        });
+
         saveMovieIndex(index);
         return index;
       } catch (e) {
@@ -2056,13 +2099,35 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
 
     function updateUserUI() {
       if (!currentUser) return;
+      const admin = isAdmin();
+
       document.getElementById('user-avatar-badge').innerText = currentUser.avatar;
-      document.getElementById('user-name-badge').innerText = currentUser.name.split(' ')[0];
+      document.getElementById('user-name-badge').innerText = currentUser.name.split(' ')[0] + (admin ? " (Admin)" : "");
       document.getElementById('dd-avatar').innerText = currentUser.avatar;
-      document.getElementById('dd-name').innerText = currentUser.name;
+      document.getElementById('dd-name').innerHTML = `${currentUser.name} ${admin ? '<span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-mono ml-1 font-bold">ADMIN</span>' : ''}`;
       document.getElementById('dd-email').innerText = currentUser.email;
       document.getElementById('stat-indexed').innerText = currentUser.indexedCount || 0;
       document.getElementById('btn-signout').classList.remove('hidden');
+
+      // Top navbar Cloud DB settings button: strictly visible only to Admin
+      const navCloudBtn = document.getElementById('btn-cloud-status');
+      if (navCloudBtn) {
+        if (admin) {
+          navCloudBtn.classList.remove('hidden');
+        } else {
+          navCloudBtn.classList.add('hidden');
+        }
+      }
+
+      // Profile dropdown Admin Cloud DB button: strictly visible only to Admin
+      const ddAdminBtn = document.getElementById('dd-admin-cloud-btn');
+      if (ddAdminBtn) {
+        if (admin) {
+          ddAdminBtn.classList.remove('hidden');
+        } else {
+          ddAdminBtn.classList.add('hidden');
+        }
+      }
     }
 
     function toggleProfileDropdown(event) {
@@ -2333,8 +2398,8 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
         } catch (e) {
           console.warn("TMDB search error", e);
         }
-      } else if (!TMDB_API_KEY && query.length >= 2) {
-        // Helpful tip to enable TMDB live searching
+      } else if (!TMDB_API_KEY && query.length >= 2 && isAdmin()) {
+        // Helpful tip to enable TMDB live searching (visible to Admin only)
         const tmdbHint = document.createElement('div');
         tmdbHint.className = "p-2.5 bg-zinc-900/60 border-t border-nborder flex items-center justify-between text-[10px] text-zinc-400";
         tmdbHint.innerHTML = `
@@ -2470,33 +2535,83 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
 
       const movieTitle = query.startsWith('tt') ? "Cinema Masterpiece " + movieId : query;
       
+      showToast(`Indexing "${query}" from Open Movie Library...`);
+
       const newEntry = {
         id: movieId,
         title: movieTitle,
         year: 2024,
         platform: "Netflix / JioCinema",
         runtime: "2h 10m",
-        genre: "Drama, Thriller",
-        imdb: "8.1",
+        genre: "Drama, Romance",
+        imdb: "7.8",
         rt: "88%",
-        youtubeId: "dQw4w9WgXcQ",
+        youtubeId: "gzeaGcLLl_A",
         poster: "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=500&auto=format&fit=crop&q=80",
-        synopsis: `Custom indexed title added to CinePulse catalog under unique identifier ${movieId}. Available to all users with zero duplicate API lookups.`,
+        synopsis: "Loading authentic synopsis from Open Movie Library...",
         indexedBy: currentUser ? currentUser.email : "user"
       };
 
       MOVIE_DATABASE_INDEX[movieId] = newEntry;
       saveMovieIndex(MOVIE_DATABASE_INDEX);
-      syncMovieToCloud(newEntry);
+      clearMovieSearch();
+      selectAndFeatureMovie(movieId);
+
+      // Asynchronously fetch authentic caption/synopsis and trailer from Open Movie Library & YouTube
+      fetchOpenMovieMetadata(query).then(meta => {
+        if (meta && meta.synopsis) {
+          newEntry.title = meta.title || newEntry.title;
+          newEntry.synopsis = meta.synopsis;
+          newEntry.year = meta.year || newEntry.year;
+          newEntry.genre = meta.genre || newEntry.genre;
+          newEntry.imdb = meta.imdb || newEntry.imdb;
+          newEntry.runtime = meta.runtime || newEntry.runtime;
+          if (meta.poster && meta.poster.startsWith('http')) {
+            newEntry.poster = meta.poster;
+          }
+          if (meta.id && meta.id.startsWith('tt')) {
+            newEntry.id = meta.id;
+            MOVIE_DATABASE_INDEX[meta.id] = newEntry;
+          }
+          MOVIE_DATABASE_INDEX[movieId] = newEntry;
+          saveMovieIndex(MOVIE_DATABASE_INDEX);
+          syncMovieToCloud(newEntry);
+          setFeaturedMovie(newEntry.id);
+          showToast(`Loaded authentic synopsis for "${newEntry.title}"!`);
+        }
+      });
+
+      // Also resolve exact open trailer
+      resolvePublicTrailer(query, '2024').then(res => {
+        if (res && res.videoId) {
+          newEntry.youtubeId = res.videoId;
+          newEntry.trailer_url = res.trailerUrl;
+          MOVIE_DATABASE_INDEX[movieId] = newEntry;
+          saveMovieIndex(MOVIE_DATABASE_INDEX);
+          updateHeroTrailer(res.videoId);
+        }
+      });
 
       if (currentUser) {
         currentUser.indexedCount = (currentUser.indexedCount || 0) + 1;
         updateUserUI();
       }
+    }
 
-      clearMovieSearch();
-      selectAndFeatureMovie(movieId);
-      showToast(`Indexed "${newEntry.title}" under ID ${movieId}!`);
+    async function fetchOpenMovieMetadata(query) {
+      if (!query) return null;
+      try {
+        const res = await fetch(`/api/movie?q=${encodeURIComponent(query)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.synopsis) {
+            return data;
+          }
+        }
+      } catch (e) {
+        console.warn("Notice during open movie lookup:", e);
+      }
+      return null;
     }
 
     function showIndexBar(msg) {
