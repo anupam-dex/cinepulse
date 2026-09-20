@@ -283,10 +283,6 @@
 
           <!-- Top-Right Autoplay Trailer Controls -->
           <div class="absolute top-4 right-4 z-30 flex items-center gap-2">
-            <div id="hero-buffer-indicator" class="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur border border-white/20 text-[10px] text-zinc-300 font-mono flex items-center gap-1.5 transition-opacity duration-300">
-              <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
-              <span id="hero-buffer-text">1080p Stream</span>
-            </div>
             <!-- Minimalist White Line-Drawn Speaker / Mute Toggle Button -->
             <button id="btn-hero-audio" onclick="toggleHeroAudio()" title="Toggle Trailer Audio" aria-label="Toggle Trailer Audio" 
                     class="w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur border border-white/30 hover:border-white/70 flex items-center justify-center text-white transition-all shadow-lg active:scale-90 cursor-pointer">
@@ -366,6 +362,10 @@
             </button>
             <button onclick="openDetailModal(currentFeaturedId)" class="px-3.5 py-3 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 font-semibold text-xs border border-zinc-800 transition-colors">
               Details & Notes
+            </button>
+            <button onclick="openShareModal(currentFeaturedId)" class="px-4 py-3 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 font-bold text-xs sm:text-sm border border-sky-500/40 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg shadow-sky-950/30" title="Share this movie with a friend">
+              <span class="text-sm">🔗</span>
+              <span>Share</span>
             </button>
           </div>
         </div>
@@ -726,6 +726,10 @@
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
+          <button onclick="openShareModal(currentStreamingMovie || currentFeaturedId)" class="px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer" title="Share movie with friends">
+            <span>🔗</span>
+            <span class="hidden sm:inline">Share</span>
+          </button>
           <button onclick="closeStreamingModal()" class="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer" title="Close streaming window (Esc)">
             ✕
           </button>
@@ -1439,6 +1443,9 @@
             <button id="btn-modal-watch" class="px-3.5 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs transition-colors shadow">
               ✓ Watched
             </button>
+            <button id="btn-modal-share" onclick="openShareModal(currentDetailMovieId)" class="px-3 py-2 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 font-bold text-xs flex items-center gap-1.5 transition-all shadow cursor-pointer" title="Share this movie with a friend">
+              <span>🔗</span> Share
+            </button>
           </div>
           <button onclick="closeDetailModal()" class="text-zinc-400 hover:text-white text-xs">Close</button>
         </div>
@@ -1472,6 +1479,86 @@
         </button>
         <button onclick="lockShufflePick()" class="px-4 py-2 rounded-lg bg-nred hover:bg-red-700 text-white font-bold text-xs shadow-lg transition-colors">
           Watch Tonight!
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Movie Modal -->
+  <div id="share-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="relative w-full max-w-md bg-nsurface rounded-2xl overflow-hidden shadow-2xl border border-nborder text-zinc-200 p-6 space-y-5">
+      <!-- Close Button -->
+      <button onclick="closeShareModal()" class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer" title="Close">
+        ✕
+      </button>
+
+      <!-- Header -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-500/30 flex items-center justify-center text-sky-400 text-lg shrink-0">
+          🔗
+        </div>
+        <div>
+          <h3 class="text-lg font-black text-white leading-snug">Share with a Friend</h3>
+          <p class="text-xs text-zinc-400">Invite friends to watch, rate, or discuss this movie</p>
+        </div>
+      </div>
+
+      <!-- Movie Preview Card -->
+      <div class="p-3 rounded-xl bg-zinc-900/90 border border-zinc-800 flex items-center gap-3">
+        <img id="share-movie-poster" src="" alt="Poster" class="w-12 h-16 object-cover rounded-lg shrink-0 bg-zinc-800 shadow">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <h4 id="share-movie-title" class="text-sm font-bold text-white truncate">Movie Title</h4>
+            <span id="share-movie-year" class="text-xs text-zinc-400 shrink-0">(2024)</span>
+          </div>
+          <p id="share-movie-sub" class="text-[11px] text-zinc-400 truncate mt-0.5"></p>
+          <div class="flex items-center gap-2 mt-1.5 text-[10px]">
+            <span id="share-movie-imdb" class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 font-bold border border-amber-500/30">IMDb 7.5</span>
+            <span id="share-movie-platform" class="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium">Netflix</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Direct Share Link Input & Copy -->
+      <div class="space-y-1.5">
+        <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Direct Movie Link</label>
+        <div class="flex items-center gap-2">
+          <input id="share-link-input" type="text" readonly class="flex-1 px-3 py-2.5 rounded-xl bg-black/60 border border-zinc-700 text-xs text-zinc-200 font-mono select-all focus:outline-none focus:border-sky-500">
+          <button id="btn-copy-share-link" onclick="copyShareLink()" class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 active:scale-95 text-white text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 shadow-lg shadow-sky-950/40 cursor-pointer">
+            <span id="btn-copy-share-icon">📋</span>
+            <span id="btn-copy-share-text">Copy</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Instant Messaging & Social Channels -->
+      <div class="space-y-2">
+        <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Quick Send via</label>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button onclick="shareViaWhatsApp()" class="p-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 hover:text-emerald-200 text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer shadow-sm">
+            <span class="text-base">💬</span>
+            <span>WhatsApp</span>
+          </button>
+          <button onclick="shareViaTelegram()" class="p-2.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-300 hover:text-sky-200 text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer shadow-sm">
+            <span class="text-base">✈️</span>
+            <span>Telegram</span>
+          </button>
+          <button onclick="shareViaTwitter()" class="p-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer shadow-sm">
+            <span class="text-base">𝕏</span>
+            <span>X / Twitter</span>
+          </button>
+          <button onclick="shareViaEmail()" class="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 hover:text-rose-200 text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer shadow-sm">
+            <span class="text-base">✉️</span>
+            <span>Email</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Native System Share Sheet (if supported) -->
+      <div id="native-share-container" class="pt-1">
+        <button onclick="triggerNativeShare()" class="w-full py-2.5 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 text-zinc-200 font-bold text-xs flex items-center justify-center gap-2 border border-zinc-700 transition-colors cursor-pointer">
+          <span>📱</span>
+          <span>More Sharing Options (AirDrop, Messages, etc.)</span>
         </button>
       </div>
     </div>
@@ -3669,7 +3756,45 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       renderUpcomingRail();
       renderCalendarGrid();
       renderVaultGrid();
-      setFeaturedMovie(currentFeaturedId);
+
+      // Check for deep-linked shared movie in URL query params (?movie=... or ?id=...)
+      const urlParams = new URLSearchParams(window.location.search);
+      const sharedMovieId = urlParams.get('movie') || urlParams.get('id');
+      if (sharedMovieId) {
+        const found = SCHEDULE_ITEMS.find(m => m.id === sharedMovieId) || MOVIE_DATABASE_INDEX[sharedMovieId];
+        if (found) {
+          setFeaturedMovie(found.id);
+          showToast(`🎬 Loaded shared movie: "${found.title}"!`);
+        } else if (sharedMovieId.startsWith('tt')) {
+          setFeaturedMovie(sharedMovieId);
+          fetchOpenMovieMetadata(sharedMovieId).then(meta => {
+            if (meta) {
+              const newEntry = {
+                id: sharedMovieId,
+                title: meta.title,
+                year: meta.year,
+                genre: meta.genre,
+                imdb: meta.imdb,
+                rt: meta.rt,
+                runtime: meta.runtime,
+                platform: "VOD / Online",
+                poster: meta.poster,
+                synopsis: meta.synopsis,
+                tag: "Friend Shared",
+                notes: "Shared via CinePulse link."
+              };
+              MOVIE_DATABASE_INDEX[sharedMovieId] = newEntry;
+              setFeaturedMovie(sharedMovieId);
+              showToast(`🎬 Loaded shared movie: "${meta.title}"!`);
+            }
+          });
+        } else {
+          setFeaturedMovie(currentFeaturedId);
+        }
+      } else {
+        setFeaturedMovie(currentFeaturedId);
+      }
+
       updateCalendarBadgeCount();
       updateWatchlistButtonState();
       checkDailyMoodPrompt();
@@ -4281,6 +4406,7 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
     }
 
     function openDetailModalFromVault(item) {
+      currentDetailMovieId = item.id || item;
       document.getElementById('m-poster').src = item.poster;
       document.getElementById('m-title').innerText = `${item.title} (${item.year})`;
       document.getElementById('m-id-badge').innerText = `ID: Logged`;
@@ -4321,6 +4447,167 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
     function closeDetailModal() {
       const modal = document.getElementById('detail-modal');
       modal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    // ==========================================
+    // MOVIE SHARING & UNIVERSAL DEEP-LINKING
+    // ==========================================
+    let currentShareMovie = null;
+
+    function openShareModal(movieIdOrObj) {
+      let movie = null;
+      if (typeof movieIdOrObj === 'object' && movieIdOrObj !== null) {
+        movie = movieIdOrObj;
+      } else if (movieIdOrObj) {
+        movie = SCHEDULE_ITEMS.find(s => s.id === movieIdOrObj) || 
+                MOVIE_DATABASE_INDEX[movieIdOrObj] || 
+                WATCHED_LIST.find(w => w.id === movieIdOrObj);
+      }
+      if (!movie) {
+        movie = SCHEDULE_ITEMS.find(s => s.id === currentFeaturedId) || 
+                MOVIE_DATABASE_INDEX[currentFeaturedId] || 
+                SCHEDULE_ITEMS[0];
+      }
+      if (!movie) {
+        showToast("Select a movie to share!");
+        return;
+      }
+
+      currentShareMovie = movie;
+
+      // Populate preview card
+      const posterEl = document.getElementById('share-movie-poster');
+      const titleEl = document.getElementById('share-movie-title');
+      const yearEl = document.getElementById('share-movie-year');
+      const subEl = document.getElementById('share-movie-sub');
+      const imdbEl = document.getElementById('share-movie-imdb');
+      const platformEl = document.getElementById('share-movie-platform');
+      const linkInput = document.getElementById('share-link-input');
+
+      if (posterEl) posterEl.src = movie.poster || '';
+      if (titleEl) titleEl.innerText = movie.title || 'Movie';
+      if (yearEl) yearEl.innerText = movie.year ? `(${movie.year})` : '';
+      if (subEl) subEl.innerText = `${movie.genre || movie.tag || 'Curated'} • ${movie.runtime || ''}`.replace(/ • $/, '');
+      if (imdbEl) imdbEl.innerText = movie.imdb ? `IMDb ${movie.imdb}` : 'IMDb 8.0';
+      if (platformEl) platformEl.innerText = movie.platform || 'Online';
+
+      // Build universal share link
+      const shareUrl = buildMovieShareUrl(movie.id);
+      if (linkInput) linkInput.value = shareUrl;
+
+      // Reset copy button state
+      const copyBtnText = document.getElementById('btn-copy-share-text');
+      const copyBtnIcon = document.getElementById('btn-copy-share-icon');
+      if (copyBtnText) copyBtnText.innerText = "Copy";
+      if (copyBtnIcon) copyBtnIcon.innerText = "📋";
+
+      // Native share button visibility
+      const nativeContainer = document.getElementById('native-share-container');
+      if (nativeContainer) {
+        nativeContainer.style.display = (navigator && navigator.share) ? 'block' : 'none';
+      }
+
+      // Open Modal
+      const modal = document.getElementById('share-modal');
+      if (modal) {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+      }
+      playChime(587.33, 0.08);
+    }
+
+    function closeShareModal() {
+      const modal = document.getElementById('share-modal');
+      if (modal) {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    function buildMovieShareUrl(movieId) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('movie', movieId);
+      return url.toString();
+    }
+
+    async function copyShareLink() {
+      if (!currentShareMovie) return;
+      const shareUrl = buildMovieShareUrl(currentShareMovie.id);
+      const copyBtnText = document.getElementById('btn-copy-share-text');
+      const copyBtnIcon = document.getElementById('btn-copy-share-icon');
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(shareUrl);
+        } else {
+          const input = document.getElementById('share-link-input');
+          if (input) {
+            input.select();
+            document.execCommand('copy');
+          }
+        }
+        if (copyBtnText) copyBtnText.innerText = "Copied!";
+        if (copyBtnIcon) copyBtnIcon.innerText = "✓";
+        showToast(`🍿 Link to "${currentShareMovie.title}" copied to clipboard!`);
+        setTimeout(() => {
+          if (copyBtnText) copyBtnText.innerText = "Copy";
+          if (copyBtnIcon) copyBtnIcon.innerText = "📋";
+        }, 2500);
+      } catch (err) {
+        const input = document.getElementById('share-link-input');
+        if (input) {
+          input.select();
+          document.execCommand('copy');
+          showToast("Link copied to clipboard!");
+        }
+      }
+    }
+
+    function shareViaWhatsApp() {
+      if (!currentShareMovie) return;
+      const shareUrl = buildMovieShareUrl(currentShareMovie.id);
+      const text = `🎬 Check out "${currentShareMovie.title} (${currentShareMovie.year})" on CinePulse! Free trailer, ratings & streaming details: ${shareUrl}`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function shareViaTelegram() {
+      if (!currentShareMovie) return;
+      const shareUrl = buildMovieShareUrl(currentShareMovie.id);
+      const text = `🎬 Check out "${currentShareMovie.title} (${currentShareMovie.year})" on CinePulse!`;
+      window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function shareViaTwitter() {
+      if (!currentShareMovie) return;
+      const shareUrl = buildMovieShareUrl(currentShareMovie.id);
+      const text = `Watching "${currentShareMovie.title} (${currentShareMovie.year})" on #CinePulse 🍿 Check it out:`;
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+    }
+
+    function shareViaEmail() {
+      if (!currentShareMovie) return;
+      const shareUrl = buildMovieShareUrl(currentShareMovie.id);
+      const subject = `Movie Recommendation: ${currentShareMovie.title} (${currentShareMovie.year})`;
+      const body = `Hey,\n\nI thought you would love to watch "${currentShareMovie.title} (${currentShareMovie.year})" on CinePulse.\n\nCheck out the trailer, IMDb score, and streaming details here:\n${shareUrl}\n\nEnjoy the movie!`;
+      window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    async function triggerNativeShare() {
+      if (!currentShareMovie) return;
+      const shareUrl = buildMovieShareUrl(currentShareMovie.id);
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `${currentShareMovie.title} (${currentShareMovie.year}) - CinePulse`,
+            text: `🎬 Check out "${currentShareMovie.title} (${currentShareMovie.year})" on CinePulse!`,
+            url: shareUrl
+          });
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            copyShareLink();
+          }
+        }
+      } else {
+        copyShareLink();
+      }
     }
 
     function triggerShuffleWithSound() {
@@ -5085,6 +5372,10 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       if (moodModal && e.target === moodModal) {
         closeDailyMoodModal(true);
       }
+      const shareModal = document.getElementById('share-modal');
+      if (shareModal && e.target === shareModal) {
+        closeShareModal();
+      }
     });
 
     document.addEventListener('keydown', (e) => {
@@ -5092,6 +5383,7 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
         closeSyncHubModal();
         closeStreamingModal();
         closeDetailModal();
+        closeShareModal();
         closeCloudConfigModal();
         closeDailyMoodModal(true);
         const shuffleModal = document.getElementById('shuffle-modal');
