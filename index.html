@@ -301,9 +301,6 @@
             <span class="px-3 py-1 rounded-md bg-nred text-white text-[11px] font-black uppercase tracking-wider shadow-lg shadow-red-950 flex items-center gap-1.5">
               <span class="animate-pulse">●</span> Tonight's Screening
             </span>
-            <span id="feat-date-tag" class="px-2.5 py-1 rounded-md bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 text-xs font-semibold">
-              Sep 14, 2026
-            </span>
             <span id="feat-imdb-id-tag" class="px-2.5 py-1 rounded-md bg-zinc-900/90 border border-yellow-500/40 text-yellow-400 text-xs font-mono font-bold flex items-center gap-1">
               🔑 ID: <span id="feat-movie-id-val">tt7134096</span>
             </span>
@@ -3695,7 +3692,8 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       document.getElementById('feat-platform').innerText = movie.platform;
       document.getElementById('feat-backdrop').src = movie.poster;
       document.getElementById('feat-movie-id-val').innerText = movie.id;
-      document.getElementById('feat-date-tag').innerText = movie.day ? `Sep ${movie.day}, 2026` : "Featured Screening";
+      const dateTag = document.getElementById('feat-date-tag');
+      if (dateTag) dateTag.innerText = movie.day ? `Sep ${movie.day}, 2026` : "Featured Screening";
 
       const taglineEl = document.getElementById('feat-tagline');
       if (taglineEl) {
