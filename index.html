@@ -266,7 +266,8 @@
           <!-- Autoplay Video Player Wrapper (Seamless background trailer with no pause symbols or controls) -->
           <div id="hero-player-wrap" class="absolute inset-0 overflow-hidden flex items-center justify-center transition-opacity duration-700 opacity-90 z-[2] pointer-events-none select-none">
             <iframe id="feat-trailer-player" 
-                    src="https://www.youtube-nocookie.com/embed/gzeaGcLLl_A?autoplay=1&mute=1&controls=0&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&loop=1&playlist=gzeaGcLLl_A&autohide=1&showinfo=0" 
+                    src="about:blank"
+                    loading="lazy"
                     title="Featured Movie Trailer"
                     class="w-[140%] h-[140%] min-w-[100vw] min-h-[56.25vw] object-cover border-0 pointer-events-none select-none scale-105" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -1525,39 +1526,62 @@
         <div class="flex items-center gap-2">
           <input id="share-link-input" type="text" readonly class="flex-1 px-3 py-2.5 rounded-xl bg-black/60 border border-zinc-700 text-xs text-zinc-200 font-mono select-all focus:outline-none focus:border-sky-500">
           <button id="btn-copy-share-link" onclick="copyShareLink()" class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 active:scale-95 text-white text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 shadow-lg shadow-sky-950/40 cursor-pointer">
-            <span id="btn-copy-share-icon">📋</span>
+            <span id="btn-copy-share-icon" class="inline-flex items-center">
+              <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </span>
             <span id="btn-copy-share-text">Copy</span>
           </button>
         </div>
       </div>
 
-      <!-- Instant Messaging & Social Channels -->
+      <!-- Instant Messaging & Social Channels with Official Brand Logos -->
       <div class="space-y-2">
         <label class="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Quick Send via</label>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <button onclick="shareViaWhatsApp()" class="p-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 hover:text-emerald-200 text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer shadow-sm">
-            <span class="text-base">💬</span>
+          <!-- WhatsApp Official Brand Logo -->
+          <button onclick="shareViaWhatsApp()" class="p-3 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 text-emerald-300 hover:text-emerald-200 text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm group">
+            <svg class="w-5 h-5 fill-[#25D366] group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+              <path d="M12.004 2C6.48 2 2 6.48 2 12.004c0 1.947.56 3.766 1.528 5.309L2.3 22l4.838-1.217a9.96 9.96 0 0 0 4.866 1.225h.004c5.523 0 10.004-4.48 10.004-10.004 0-2.673-1.041-5.186-2.932-7.076A9.94 9.94 0 0 0 12.004 2zm5.836 14.28c-.244.685-1.42 1.309-1.957 1.393-.497.078-1.127.11-3.26-.774-2.564-1.063-4.2-3.666-4.327-3.837-.128-.17-1.037-1.38-1.037-2.632 0-1.252.656-1.868.89-2.122.233-.255.51-.319.68-.319.17 0 .34.002.489.01.157.008.368-.06.576.44.212.51.723 1.764.786 1.892.064.128.106.276.022.446-.086.17-.128.276-.255.425-.128.149-.268.333-.383.447-.127.127-.26.265-.112.519.149.254.66 1.09 1.417 1.764.975.869 1.796 1.139 2.051 1.266.255.127.404.106.553-.064.148-.17.637-.743.807-.998.17-.255.34-.212.574-.127.234.085 1.488.701 1.743.829.255.127.425.191.489.297.064.106.064.616-.18 1.301z"/>
+            </svg>
             <span>WhatsApp</span>
           </button>
-          <button onclick="shareViaTelegram()" class="p-2.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-300 hover:text-sky-200 text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer shadow-sm">
-            <span class="text-base">✈️</span>
+
+          <!-- Telegram Official Brand Logo -->
+          <button onclick="shareViaTelegram()" class="p-3 rounded-xl bg-[#229ED9]/10 hover:bg-[#229ED9]/20 border border-[#229ED9]/30 text-sky-300 hover:text-sky-200 text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm group">
+            <svg class="w-5 h-5 fill-[#229ED9] group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+            </svg>
             <span>Telegram</span>
           </button>
-          <button onclick="shareViaTwitter()" class="p-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer shadow-sm">
-            <span class="text-base">𝕏</span>
+
+          <!-- X / Twitter Official Vector Logo -->
+          <button onclick="shareViaTwitter()" class="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/20 text-zinc-200 hover:text-white text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm group">
+            <svg class="w-4 h-4 fill-white group-hover:scale-110 transition-transform my-0.5" viewBox="0 0 24 24">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
             <span>X / Twitter</span>
           </button>
-          <button onclick="shareViaEmail()" class="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 hover:text-rose-200 text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer shadow-sm">
-            <span class="text-base">✉️</span>
+
+          <!-- Email / Gmail Official Vector Logo -->
+          <button onclick="shareViaEmail()" class="p-3 rounded-xl bg-[#EA4335]/10 hover:bg-[#EA4335]/20 border border-[#EA4335]/30 text-rose-300 hover:text-rose-200 text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm group">
+            <svg class="w-5 h-5 fill-[#EA4335] group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+              <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/>
+            </svg>
             <span>Email</span>
           </button>
         </div>
       </div>
 
-      <!-- Native System Share Sheet (if supported) -->
+      <!-- Native System Share Sheet (AirDrop, Messages, etc.) with Official Vector Logo -->
       <div id="native-share-container" class="pt-1">
-        <button onclick="triggerNativeShare()" class="w-full py-2.5 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 text-zinc-200 font-bold text-xs flex items-center justify-center gap-2 border border-zinc-700 transition-colors cursor-pointer">
-          <span>📱</span>
+        <button onclick="triggerNativeShare()" class="w-full py-2.5 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 text-zinc-200 font-bold text-xs flex items-center justify-center gap-2 border border-zinc-700 transition-colors cursor-pointer group">
+          <!-- AirDrop Vector Icon -->
+          <svg class="w-4 h-4 fill-sky-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+            <path d="M12 3a9 9 0 0 0-9 9c0 2.12.74 4.07 1.97 5.61l1.42-1.42A6.97 6.97 0 0 1 5 12a7 7 0 1 1 14 0c0 1.62-.55 3.12-1.48 4.31l1.44 1.44A8.97 8.97 0 0 0 21 12a9 9 0 0 0-9-9zm0 4a5 5 0 0 0-5 5c0 1.15.39 2.22 1.05 3.07l1.43-1.43A2.98 2.98 0 0 1 9 12a3 3 0 1 1 6 0c0 .65-.21 1.25-.56 1.74l1.45 1.45A4.97 4.97 0 0 0 17 12a5 5 0 0 0-5-5zm0 4a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+          </svg>
           <span>More Sharing Options (AirDrop, Messages, etc.)</span>
         </button>
       </div>
@@ -2092,26 +2116,28 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
           }
         });
 
-        // Auto-heal any placeholder synopses using Open Movie Library
-        Object.keys(index).forEach(k => {
-          const item = index[k];
-          if (item && item.synopsis && item.synopsis.includes('Custom indexed title added to CinePulse catalog')) {
-            // Fetch authentic synopsis asynchronously
-            fetchOpenMovieMetadata(item.title).then(meta => {
-              if (meta && meta.synopsis) {
-                item.synopsis = meta.synopsis;
-                if (meta.poster && meta.poster.startsWith('http')) item.poster = meta.poster;
-                if (meta.genre) item.genre = meta.genre;
-                if (meta.imdb) item.imdb = meta.imdb;
-                saveMovieIndex(index);
-                const curFeatId = currentFeaturedId;
-                if (curFeatId === k) {
-                  setFeaturedMovie(k);
+        // Auto-heal placeholder synopses only when running with local Python backend
+        if (typeof HAS_LOCAL_BACKEND !== 'undefined' && HAS_LOCAL_BACKEND) {
+          Object.keys(index).forEach(k => {
+            const item = index[k];
+            if (item && item.synopsis && item.synopsis.includes('Custom indexed title added to CinePulse catalog')) {
+              // Fetch authentic synopsis asynchronously
+              fetchOpenMovieMetadata(item.title).then(meta => {
+                if (meta && meta.synopsis) {
+                  item.synopsis = meta.synopsis;
+                  if (meta.poster && meta.poster.startsWith('http')) item.poster = meta.poster;
+                  if (meta.genre) item.genre = meta.genre;
+                  if (meta.imdb) item.imdb = meta.imdb;
+                  saveMovieIndex(index);
+                  const curFeatId = currentFeaturedId;
+                  if (curFeatId === k) {
+                    setFeaturedMovie(k);
+                  }
                 }
-              }
-            });
-          }
-        });
+              });
+            }
+          });
+        }
 
         saveMovieIndex(index);
         return index;
@@ -2120,6 +2146,11 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
       }
       return Object.assign({}, MASTER_SEED_INDEX);
     }
+
+    const HAS_LOCAL_BACKEND = window.location.hostname === 'localhost' || 
+                              window.location.hostname === '127.0.0.1' || 
+                              window.location.hostname.startsWith('192.168.') || 
+                              window.location.hostname.startsWith('10.');
 
     function saveMovieIndex(index) {
       try {
@@ -2131,7 +2162,7 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
 
     // Public open-source resolver for any movie trailer or teaser
     async function resolvePublicTrailer(movieTitle, year = '') {
-      if (!movieTitle) return null;
+      if (!movieTitle || !HAS_LOCAL_BACKEND) return null;
       try {
         const q = `${movieTitle} ${year}`.trim();
         const res = await fetch(`/api/trailer?q=${encodeURIComponent(q)}`);
@@ -2683,7 +2714,7 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
     }
 
     async function fetchOpenMovieMetadata(query) {
-      if (!query) return null;
+      if (!query || !HAS_LOCAL_BACKEND) return null;
       try {
         const res = await fetch(`/api/movie?q=${encodeURIComponent(query)}`);
         if (res.ok) {
@@ -5389,6 +5420,34 @@ create policy "Public Upsert" on public.movies for all using (true) with check (
         const shuffleModal = document.getElementById('shuffle-modal');
         if (shuffleModal) shuffleModal.classList.add('opacity-0', 'pointer-events-none');
       }
+    });
+
+    // -------------------------------------------------------------
+    // AUDIO SAFETY: Cut audio immediately when tab is hidden, closed, or unloaded
+    // -------------------------------------------------------------
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        pauseHeroTrailer();
+        if (heroPlayer && typeof heroPlayer.mute === 'function') {
+          try { heroPlayer.mute(); } catch(e) {}
+        }
+      }
+    });
+
+    window.addEventListener('pagehide', () => {
+      pauseHeroTrailer();
+      const iframe = document.getElementById('feat-trailer-player');
+      if (iframe) iframe.src = 'about:blank';
+      const streamPlayer = document.getElementById('stream-player-iframe');
+      if (streamPlayer) streamPlayer.src = 'about:blank';
+    });
+
+    window.addEventListener('beforeunload', () => {
+      pauseHeroTrailer();
+      const iframe = document.getElementById('feat-trailer-player');
+      if (iframe) iframe.src = 'about:blank';
+      const streamPlayer = document.getElementById('stream-player-iframe');
+      if (streamPlayer) streamPlayer.src = 'about:blank';
     });
   </script>
 </body>
